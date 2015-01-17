@@ -1,0 +1,13 @@
+<?xml version = "1.0" encoding="utf-8"?>
+    <resources>
+        <string-array name="city_types">
+            <item>בחר עיר מהרשימה</item>
+            <item>ירושלים</item>
+            <item>תל-אביב</item>
+            <item>בית שמש</item>
+            <item>חיפה</item>
+            <item>אריאל</item>
+            <item>אבו גוש</item>
+            <item>חוסם</item>
+        </string-array>
+    </resources> 

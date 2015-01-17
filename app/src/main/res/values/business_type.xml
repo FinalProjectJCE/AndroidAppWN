@@ -1,0 +1,12 @@
+<?xml version = "1.0" encoding="utf-8"?>
+    <resources>
+        <string-array name="business_types">
+            <item>בחר עסק מהרשימה</item>
+            <item>סלקום</item>
+            <item>משרד הפנים</item>
+            <item>דואר ישראל</item>
+            <item>ביטוח לאומי</item>
+        </string-array>
+    </resources>
+
+
