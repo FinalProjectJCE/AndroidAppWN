@@ -3,6 +3,7 @@ package com.example.zaken.androidappwn;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.AndroidCharacter;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +21,9 @@ public class MainActivity2 extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main_activity2);
+        cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
         addItemsToCityTypeSpinner();
         addListenerToCityTypeSpinner();
         addItemsToBusinessTypeSpinner();
@@ -53,7 +56,7 @@ public class MainActivity2 extends Activity {
     }
     public void addItemsToCityTypeSpinner()
     {
-        cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
+
         ArrayAdapter<CharSequence> cityTypeSpinnerAdapter = ArrayAdapter.createFromResource(this,R.array.city_types,android.R.layout.simple_spinner_item);
         cityTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         cityTypeSpinner.setAdapter(cityTypeSpinnerAdapter);
@@ -130,6 +133,9 @@ public class MainActivity2 extends Activity {
 
     public void send_business(View view){
         Intent i=new Intent(this,MainActivity3.class);
+        i.putExtra("name",cityTypeSpinner.getSelectedItem().toString() );
+       // i.putExtra("time", user.getUserFullName());
+        Log.d(cityTypeSpinner.getSelectedItem().toString(), "");
         startActivity(i);
     }
 
