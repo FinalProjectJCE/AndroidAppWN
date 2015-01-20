@@ -1,0 +1,12 @@
+<?xml version = "1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="branch_types">
+        <item>בחר סניף מהרשימה</item>
+        <item>מרכז העיר</item>
+        <item>קניון מלחה</item>
+        <item>גבעת שאול</item>
+        <item>רחביה</item>
+        <item>תלפיות</item>
+        <item>רמות</item>
+    </string-array>
+</resources>

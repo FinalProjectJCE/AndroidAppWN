@@ -9,12 +9,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.content.Intent;
 
 
 public class MainActivity2 extends Activity {
 
     private Spinner cityTypeSpinner;
     private Spinner businessTypeSpinner;
+    private Spinner branchTypeSpinner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +25,8 @@ public class MainActivity2 extends Activity {
         addListenerToCityTypeSpinner();
         addItemsToBusinessTypeSpinner();
         addListenerToBusinessTypeSpinner();
+        addItemsToBranchTypeSpinner();
+        addListenerToBranchTypeSpinner();
     }
 
 
@@ -97,4 +101,37 @@ public class MainActivity2 extends Activity {
             }
         });
     }
+
+    public void addItemsToBranchTypeSpinner()
+    {
+        branchTypeSpinner = (Spinner) findViewById(R.id.branch_type_spinner);
+        ArrayAdapter<CharSequence> branchTypeSpinnerAdapter = ArrayAdapter.createFromResource(this,R.array.branch_types,android.R.layout.simple_spinner_item);
+        branchTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        branchTypeSpinner.setAdapter(branchTypeSpinnerAdapter);
+    }
+
+    public void addListenerToBranchTypeSpinner()
+    {
+        branchTypeSpinner = (Spinner) findViewById(R.id.branch_type_spinner);
+        branchTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long l)
+            {
+                String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
+                //TODO add somethimg here
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    public void send_business(View view){
+        Intent i=new Intent(this,MainActivity3.class);
+        startActivity(i);
+    }
+
+
 }
