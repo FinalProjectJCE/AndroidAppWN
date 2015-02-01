@@ -133,7 +133,10 @@ public class MainActivity2 extends Activity {
 
     public void send_business(View view){
         Intent i=new Intent(this,MainActivity3.class);
-        i.putExtra("name",cityTypeSpinner.getSelectedItem().toString() );
+        //i.putExtra("name",cityTypeSpinner.getSelectedItem().toString() );
+        i.putExtra("name",businessTypeSpinner.getSelectedItem().toString()+" "+
+                branchTypeSpinner.getSelectedItem().toString() +" "+
+                cityTypeSpinner.getSelectedItem().toString());
        // i.putExtra("time", user.getUserFullName());
         Log.d(cityTypeSpinner.getSelectedItem().toString(), "");
         startActivity(i);

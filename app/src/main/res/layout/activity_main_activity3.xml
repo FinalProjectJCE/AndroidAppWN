@@ -1,0 +1,145 @@
+ <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.zaken.androidappwn.MainActivity3">
+
+
+     <LinearLayout
+         android:orientation="vertical"
+         android:layout_width="fill_parent"
+         android:layout_height="fill_parent"
+         android:id="@+id/linearLayout2">
+
+         <LinearLayout
+             android:orientation="vertical"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:layout_alignParentTop="true"
+             android:layout_centerHorizontal="true"
+             android:id="@+id/linearLayout"
+             android:layout_weight="0.3">
+
+         </LinearLayout>
+
+         <TableLayout
+             android:id="@+id/tableLayout1"
+             android:layout_width="fill_parent"
+             android:layout_height="204dp">
+
+
+             <TableRow
+                 android:id="@+id/tableRow2"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="0.3" >
+
+                 <Button
+                     android:id="@+id/newBussienesButton"
+                     android:layout_width="0dip"
+                     android:layout_height="fill_parent"
+                     android:layout_weight="1"
+                     android:text="בחר בית עסק חדש"
+                     android:textSize="20dp" />
+
+                 <Button
+                     android:id="@+id/getQueueButton"
+                     android:layout_width="0dip"
+                     android:layout_height="fill_parent"
+                     android:layout_weight="1"
+                     android:text="קבל תור"
+                     android:textSize="25dp"
+                     android:onClick="getQueueButtonClick"/>
+
+             </TableRow>
+
+             <TableRow
+                 android:id="@+id/tableRow3"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="0.3" >
+
+                 <Button
+                     android:id="@+id/openingTimeButton"
+                     android:layout_width="0dip"
+                     android:layout_height="fill_parent"
+                     android:layout_weight="1"
+                     android:text="שעות פתיחה"
+                     android:textSize="25dp" />
+
+                 <Button
+                     android:id="@+id/recommendationButton"
+                     android:layout_width="0dip"
+                     android:layout_height="fill_parent"
+                     android:layout_weight="1"
+                     android:text="המלצות למתי להגיע"
+                     android:textSize="20dp" />
+
+             </TableRow>
+
+         </TableLayout>
+     </LinearLayout>
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:textAppearance="?android:attr/textAppearanceLarge"
+         android:text="Medium Text"
+         android:id="@+id/business_name"
+         android:textSize="20dp"
+         android:layout_weight="1"
+         android:layout_alignParentTop="true"
+         android:layout_centerHorizontal="true"
+         android:textStyle="bold" />
+     <View
+         android:layout_width="fill_parent"
+         android:layout_height="1dp"
+         android:background="@android:color/darker_gray"
+         android:layout_alignTop="@+id/current_queue"
+         android:id="@+id/separated_line1" />
+
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:textAppearance="?android:attr/textAppearanceLarge"
+         android:text="מספר התור הנוכחי הוא: "
+         android:id="@+id/current_queue"
+         android:textSize="20sp"
+         android:layout_weight="1"
+         android:layout_below="@+id/business_name"
+         android:layout_alignEnd="@+id/linearLayout2"
+         android:padding="20dp" />
+     <View
+         android:layout_width="fill_parent"
+         android:layout_height="1dp"
+         android:background="@android:color/darker_gray"
+         android:layout_alignTop="@+id/estimate_time"
+         android:id="@+id/separated_line2" />
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:textAppearance="?android:attr/textAppearanceLarge"
+         android:text="במידה ותקח תור עכשיו, הזמן המשוער לקבלת התור יהיה: 18 דקות"
+         android:id="@+id/estimate_time"
+         android:textSize="20dp"
+         android:layout_weight="1"
+         android:layout_below="@+id/current_queue"
+         android:layout_centerHorizontal="true"
+         android:padding="20dp" />
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:textAppearance="?android:attr/textAppearanceLarge"
+         android:text="טוען..."
+         android:id="@+id/currenQueueDisplay"
+         android:textSize="20sp"
+         android:layout_below="@+id/separated_line1"
+         android:layout_above="@+id/separated_line2"
+         android:padding="20dp" />
+
+ </RelativeLayout>

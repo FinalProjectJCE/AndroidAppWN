@@ -9,5 +9,7 @@
     <string name="choose_branch">סניף</string>
     <string name="title_activity_main_activity3">MainActivity3</string>
     <string name="hello_world">Hello world!</string>
+    <string name="first_page_send_button">שלח</string>
+    <string name="title_activity_main_activity4">MainActivity4</string>
 
 </resources>
