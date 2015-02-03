@@ -1,6 +1,7 @@
 package com.example.zaken.androidappwn;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -8,7 +9,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,22 +22,30 @@ import java.sql.Statement;
 
 public class MainActivity4 extends Activity {
 
-    TextView business_name_in_queue,current_line_in_queue,currentQueueDisplay_in_queue;
-    SendQueryAsync task;
+    TextView business_name_in_queue,current_line_in_queue
+            ,totalQueueDisplay,currentQueueDisplay_in_queue,userQueueDisplay;
+    SendQueryAsync task,task2;
+    public static int userQueueNum=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_activity4);
         business_name_in_queue=(TextView) findViewById(R.id.business_name_in_queue);
         current_line_in_queue = (TextView) findViewById(R.id.current_line_in_queue);
+        totalQueueDisplay = (TextView) findViewById(R.id.totalQueueDisplay);
         currentQueueDisplay_in_queue = (TextView) findViewById(R.id.currentQueueDisplay_in_queue);
+        userQueueDisplay = (TextView) findViewById(R.id.userQueueDisplay);
         Intent intent = getIntent();
         String businessNameFromIntent = intent.getStringExtra("businessNameFromIntent");
         business_name_in_queue.setText(businessNameFromIntent);
 
         String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '111'";
+        String query2="SELECT TotalQueue FROM Queue WHERE BusinessId = '111' ";
         task = new SendQueryAsync();
-        task.execute(query);
+        task.execute(query,query2);
+        userQueueDisplay.setText(Integer.toString(userQueueNum));
+
+
     }
 
 
@@ -65,6 +76,20 @@ public class MainActivity4 extends Activity {
         task.cancel(true);
     }
 
+    public void cancelQueueButtonClick(View view)
+    {
+        userQueueNum=0;
+
+        Context context = getApplicationContext();
+        CharSequence text = "התור שלך בוטל";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+
+        finish();
+    }
+
 //#@#@#@#@#@#@#@#@#@#@@@@@@@@@@@@@@@@@#####################@@@@@@@@@@@@@@@@@@###############
     private class SendQueryAsync extends AsyncTask<String,Integer,Integer> {
         //        AsyncTask<Params, Progress, Result>:
@@ -85,22 +110,26 @@ public class MainActivity4 extends Activity {
                 boolean running = true;
                 Class.forName("com.mysql.jdbc.Driver");
                 Connection con = DriverManager.getConnection(DB_URL, USER, PASS);
-                System.out.println("\nHere1\n");
-
                 String result = "\nDatabase connection success\n";
                 Statement st = con.createStatement();
-                System.out.println("\nsqlQ[1] : " + sqlQ[0] + "\n");
+                Statement st2 = con.createStatement();
+                System.out.println("\nsqlQ[0] : " + sqlQ[0] + "\n");
                 while(running) {
                     String query = sqlQ[0];
+                    String query2 = sqlQ[1];
                     ResultSet rs = st.executeQuery(query);
+                    ResultSet rs2 = st2.executeQuery(query2);
                     ResultSetMetaData rsmd = rs.getMetaData();
-                    System.out.println("\nsqlQ[1] : " + sqlQ[0] + "\n");
+                    System.out.println("\nsqlQ[0] : " + sqlQ[0] + "\n");
+                    System.out.println("\nsqlQ[0] : " + sqlQ[1] + "\n");
 
-                    while (rs.next()) {
-                        System.out.println("\nHere4\n");
+                    while (rs.next()&& rs2.next()) {
                         int currentQueue = rs.getInt("CurrentQueue");
+                        int totalQueue= rs2.getInt("TotalQueue");
                         response = currentQueue;
-                        publishProgress(currentQueue);
+                        //System.out.println("\nSQLQ{1}"+sqlQ[1]+"\n");
+                        publishProgress(currentQueue,totalQueue);
+
                     }
                     if(isCancelled())
                         running=false;
@@ -118,9 +147,13 @@ public class MainActivity4 extends Activity {
 //            System.out.println("\nHere6\n");
 //        }
         protected void onProgressUpdate(Integer... progress) {
-            //finalCurrentQueue=progress[0];
             currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
-            System.out.println("\nSET TEXT\n");
+            totalQueueDisplay.setText(Integer.toString(progress[1]-progress[0]));
+            if (userQueueNum==0) {
+                userQueueNum = progress[1] + 1;
+                userQueueDisplay.setText(Integer.toString(userQueueNum));
+            }
+
         }
     }
 }

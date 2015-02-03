@@ -105,19 +105,13 @@ public class MainActivity3 extends Activity {
                 boolean running = true;
                 Class.forName("com.mysql.jdbc.Driver");
                 Connection con = DriverManager.getConnection(DB_URL, USER, PASS);
-                System.out.println("\nHere1\n");
-
                 String result = "\nDatabase connection success\n";
                 Statement st = con.createStatement();
-                System.out.println("\nsqlQ[1] : " + sqlQ[0] + "\n");
                 while(running) {
                     String query = sqlQ[0];
                     ResultSet rs = st.executeQuery(query);
                     ResultSetMetaData rsmd = rs.getMetaData();
-                    System.out.println("\nsqlQ[1] : " + sqlQ[0] + "\n");
-
                     while (rs.next()) {
-                        System.out.println("\nHere4\n");
                         int currentQueue = rs.getInt("CurrentQueue");
                         response = currentQueue;
                         publishProgress(currentQueue);
@@ -132,15 +126,8 @@ public class MainActivity3 extends Activity {
             return response;
         }
 
-        //        public void Connect() {
-//            Async task = new Async();
-//            task.execute();
-//            System.out.println("\nHere6\n");
-//        }
         protected void onProgressUpdate(Integer... progress) {
-            //finalCurrentQueue=progress[0];
             currentQueueDisplay.setText(Integer.toString(progress[0]));
-            System.out.println("\nSET TEXT\n");
         }
     }
 }
