@@ -39,8 +39,8 @@ public class MainActivity4 extends Activity {
         String businessNameFromIntent = intent.getStringExtra("businessNameFromIntent");
         business_name_in_queue.setText(businessNameFromIntent);
 
-        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '111'";
-        String query2="SELECT TotalQueue FROM Queue WHERE BusinessId = '111' ";
+        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '1'";
+        String query2="SELECT TotalQueue FROM Queue WHERE BusinessId = '1' ";
         task = new SendQueryAsync();
         task.execute(query,query2);
         userQueueDisplay.setText(Integer.toString(userQueueNum));

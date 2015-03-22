@@ -11,5 +11,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="first_page_send_button">שלח</string>
     <string name="title_activity_main_activity4">MainActivity4</string>
+    <string name="title_activity_logo">Logo</string>
+    <string name="logo_pic">logo</string>
+    <string name="spinnerText">Choose One </string>
 
 </resources>

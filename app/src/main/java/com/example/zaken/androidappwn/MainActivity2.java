@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.content.Intent;
+import android.os.AsyncTask;
+import java.util.ArrayList;
 
 
 public class MainActivity2 extends Activity {
@@ -18,15 +20,22 @@ public class MainActivity2 extends Activity {
     private Spinner cityTypeSpinner;
     private Spinner businessTypeSpinner;
     private Spinner branchTypeSpinner;
+    private String defaultTextForSpinner = "Your deafult text here";
+    Async task;
+    Async task2;
+    static ArrayList<String> d;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, defaultTextForSpinner);
         setContentView(R.layout.activity_main_activity2);
-        cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
-        addItemsToCityTypeSpinner();
+        task = new Async(1,this,this,"","");
+        task.execute();
+        //cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
+        //addItemsToCityTypeSpinner();
         addListenerToCityTypeSpinner();
-        addItemsToBusinessTypeSpinner();
+        //addItemsToBusinessTypeSpinner();
         addListenerToBusinessTypeSpinner();
         addItemsToBranchTypeSpinner();
         addListenerToBranchTypeSpinner();
@@ -69,7 +78,14 @@ public class MainActivity2 extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long l)
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
-                //TODO add somethimg here
+                System.out.println("The Item Is : "+itemSelectedInSpinner );
+                if (task.getStatus() == AsyncTask.Status.FINISHED)
+                {
+                    System.out.println("IS CANCELDEDE " );
+                    task2 = new Async(2,this,this,"","");
+                    //Finish .. Sentd Activity By A method
+                    task2.execute();
+                }
             }
 
             @Override

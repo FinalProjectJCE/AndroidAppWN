@@ -32,7 +32,7 @@ public class DBDAL extends AsyncTask<String, Void, String>
             Connection con = DriverManager.getConnection(DB_URL, USER, PASS);
             String result = "\nDatabase connection success\n";
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("SELECT CurrentQueue FROM Queue WHERE BusinessId = '111'");
+            ResultSet rs = st.executeQuery("SELECT CurrentQueue FROM Queue WHERE BusinessId = '1'");
             ResultSetMetaData rsmd = rs.getMetaData();
 
             while(rs.next()) {
@@ -56,6 +56,6 @@ public class DBDAL extends AsyncTask<String, Void, String>
 
     public int GetQueue(int queue)
     {
-        return queue;
+         return queue;
     }
 }

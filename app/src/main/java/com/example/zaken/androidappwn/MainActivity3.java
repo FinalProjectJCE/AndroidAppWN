@@ -36,7 +36,7 @@ public class MainActivity3 extends Activity {
         String name = intent.getStringExtra("name");
         business_name.setText(name);
         System.out.print("\nON CREATE!!!!!!!!!!!!! \n");
-        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '111'";
+        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '1'";
 
             task = new Async();
             task.execute(query);
@@ -71,13 +71,14 @@ public class MainActivity3 extends Activity {
     }
     public void onRestart(){
         super.onRestart();
-        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '111'";
+        String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '1'";
         task = new Async();
         task.execute(query);
     }
 
     public void getQueueButtonClick(View view)
     {
+        //UPDATE Queue SET CurrentQueue = CurrentQueue + 1 WHERE BusinessId = '111'"
         Intent i=new Intent(this,MainActivity4.class);
         i.putExtra("businessNameFromIntent",business_name.getText());
         startActivity(i);
