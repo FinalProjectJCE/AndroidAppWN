@@ -6,6 +6,7 @@ package com.example.zaken.androidappwn;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -16,18 +17,20 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public class Async extends AsyncTask<String,ArrayList,ArrayList> {
     private final Activity activity;
     private final Context context;
-    private String query;
+    private String query,query2;
     private int queryID;
     private Spinner cityTypeSpinner;
     private Spinner businessTypeSpinner;
     private Spinner branchTypeSpinner;
     private String city;
     private String business;
+    private String resultSetString,resultSetString2;
 
     public Async(int queryID, Activity activity,Context context,String city,String business){
         this.activity=activity;
@@ -35,10 +38,16 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
         this.queryID=queryID;
         this.city=city;
         this.business=business;
-        if (queryID == 1)
+        if (queryID == 1) {
             query = "SELECT DISTINCT City FROM Queue";
-        else if (queryID == 2)
+            query2 = "SELECT DISTINCT BusinessId FROM Queue";
+            resultSetString="City";
+            resultSetString2="BusinessId";
+        }
+        else if (queryID == 2) {
             query = "SELECT DISTINCT BusinessName FROM Queue WHERE City = '" + city + "'";
+            resultSetString="BusinessName";
+        }
 
     }
     static ArrayList<String> valuesList;
@@ -53,8 +62,12 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
     String PASS = "S5zS2ExvQqZQrUK8dwSJvpv5dSvED4RwmijLrG55TEesXBTrAR3QDXPCGDPijZZU";
     int SI = 0;
 
-
+    protected void onPreExecute() {
+        AsyncBL.tryMe="onPreExecute";
+        System.out.println("\nonPreExecute : "+AsyncBL.tryMe+"\n");
+    }
     protected ArrayList doInBackground(String... sqlQ) {
+        Hashtable<String,Integer> hashTable=new Hashtable<String,Integer>();
         int response = 0;
         valuesList = null;
         try {
@@ -64,31 +77,35 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
 
             String result = "\nDatabase connection success\n";
             Statement st = con.createStatement();
+            //Statement st2 = con.createStatement();
             //String query = sqlQ[0];
+            System.out.println("\nDatabase connection success\n");
             ResultSet rs = st.executeQuery(query);
-
+            //ResultSet rs2 = st2.executeQuery(query2);
+            System.out.println("executeQuery with :" + query);
             ResultSetMetaData rsmd = rs.getMetaData();
             valuesList = new ArrayList<String>();
+            System.out.println("HERE1");
             while (rs.next()) {
-                valuesList.add(rs.getString("City"));
+                valuesList.add(rs.getString(resultSetString));
+                System.out.println("ValueList Item : " +rs.getString(resultSetString) );
                 publishProgress(valuesList);
             }
+            System.out.println("HERE2");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        AsyncBL.tryMe="doInBackground";
+        System.out.println("\ndoInBackground : "+AsyncBL.tryMe+"\n");
         return valuesList;
     }
 
     protected void onProgressUpdate(ArrayList... progress) {
-        //currentQueueDisplay.setText(Integer.toString(progress[0]));
-        //System.out.println("\n" + "On PrograssUpdate" + "\n");
-        //new MainActivity().AnswerToArray(progress[0]);
-//        for (int i = 0; i < progress[0].size(); i++) {
-//            System.out.println("\n" + i + "\n");
-//            System.out.println(progress[0].get(i));
-//            //System.out.println(progress[0]);
-//        }
+        AsyncBL.tryMe="onProgressUpdate";
+        System.out.println("\nAfter execute "+AsyncBL.tryMe+"\n");
     }
+
+
     protected void onPostExecute (ArrayList valuesList)
     {
         if (queryID == 1) {
@@ -101,7 +118,11 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item, valuesList);
             businessTypeSpinner.setAdapter(adapter);
         }
-        System.out.println("NOWWWWWWWWWWWW " );
-            super.onPostExecute(valuesList);
+        System.out.println("Query id is: "+ queryID );
+        for(int i=0;i<valuesList.size();i++) {
+            System.out.println("\n"+i+"\n");
+            System.out.println(valuesList.get(i));
+        }
+
     }
 }

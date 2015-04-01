@@ -1,6 +1,7 @@
 package com.example.zaken.androidappwn;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.AndroidCharacter;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.Spinner;
 import android.content.Intent;
 import android.os.AsyncTask;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public class MainActivity2 extends Activity {
@@ -21,25 +23,53 @@ public class MainActivity2 extends Activity {
     private Spinner businessTypeSpinner;
     private Spinner branchTypeSpinner;
     private String defaultTextForSpinner = "Your deafult text here";
+    Activity activity;
+    Context context;
     Async task;
     Async task2;
-    static ArrayList<String> d;
+    AsyncBL abl;
+    static ArrayList<String> cities;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, defaultTextForSpinner);
+        setActivity(this);
+        setContext(this);
         setContentView(R.layout.activity_main_activity2);
-        task = new Async(1,this,this,"","");
-        task.execute();
-        //cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
+        cities=  new ArrayList<String>();
+
+        abl = new AsyncBL();
+        abl.getCities(this,this);
+        System.out.println("\nAfter abl "+abl.tryMe+"\n");
+//        task = new Async(1,this,this,"","");
+//        task.execute();
+        cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
         //addItemsToCityTypeSpinner();
         addListenerToCityTypeSpinner();
         //addItemsToBusinessTypeSpinner();
         addListenerToBusinessTypeSpinner();
-        addItemsToBranchTypeSpinner();
+        //addItemsToBranchTypeSpinner();
         addListenerToBranchTypeSpinner();
     }
+
+    private void setActivity(Activity activity)
+    {
+        this.activity=activity;
+    }
+    private void setContext(Context context)
+    {
+        this.context=context;
+    }
+    private Activity getActivity()
+    {
+        return this.activity;
+    }
+    private Context getContext()
+    {
+        return this.context;
+    }
+
 
 
     @Override
@@ -79,12 +109,11 @@ public class MainActivity2 extends Activity {
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
                 System.out.println("The Item Is : "+itemSelectedInSpinner );
-                if (task.getStatus() == AsyncTask.Status.FINISHED)
+                if (abl.task.getStatus() == AsyncTask.Status.FINISHED)
                 {
-                    System.out.println("IS CANCELDEDE " );
-                    task2 = new Async(2,this,this,"","");
+                    System.out.println("\nIS CANCELDEDE \n" );
+                    abl.getBusiness(getActivity(),getContext(),itemSelectedInSpinner.toString());
                     //Finish .. Sentd Activity By A method
-                    task2.execute();
                 }
             }
 
