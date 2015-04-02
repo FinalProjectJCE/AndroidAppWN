@@ -23,12 +23,13 @@ public class MainActivity2 extends Activity {
     private Spinner businessTypeSpinner;
     private Spinner branchTypeSpinner;
     private String defaultTextForSpinner = "Your deafult text here";
+    int branchId;
     Activity activity;
     Context context;
-    Async task;
-    Async task2;
     AsyncBL abl;
-    static ArrayList<String> cities;
+    static Hashtable<String,Integer> cityTable=new Hashtable<String,Integer>();
+    static Hashtable<String,Integer> businessTable=new Hashtable<String,Integer>();
+    static Hashtable<String,Integer> branchTable=new Hashtable<String,Integer>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,13 +38,8 @@ public class MainActivity2 extends Activity {
         setActivity(this);
         setContext(this);
         setContentView(R.layout.activity_main_activity2);
-        cities=  new ArrayList<String>();
-
         abl = new AsyncBL();
         abl.getCities(this,this);
-        System.out.println("\nAfter abl "+abl.tryMe+"\n");
-//        task = new Async(1,this,this,"","");
-//        task.execute();
         cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
         //addItemsToCityTypeSpinner();
         addListenerToCityTypeSpinner();
@@ -111,8 +107,10 @@ public class MainActivity2 extends Activity {
                 System.out.println("The Item Is : "+itemSelectedInSpinner );
                 if (abl.task.getStatus() == AsyncTask.Status.FINISHED)
                 {
-                    System.out.println("\nIS CANCELDEDE \n" );
-                    abl.getBusiness(getActivity(),getContext(),itemSelectedInSpinner.toString());
+                    System.out.println("Hash Is : "+cityTable);
+                    int cityId=cityTable.get(itemSelectedInSpinner.toString());
+                    System.out.println("\ncityId Is :"+cityId+ "\n" );
+                    abl.getBusiness(getActivity(),getContext(),cityId);
                     //Finish .. Sentd Activity By A method
                 }
             }
@@ -127,6 +125,7 @@ public class MainActivity2 extends Activity {
     public void addItemsToBusinessTypeSpinner()
     {
         businessTypeSpinner = (Spinner) findViewById(R.id.business_type_spinner);
+
         ArrayAdapter<CharSequence> businessTypeSpinnerAdapter = ArrayAdapter.createFromResource(this,R.array.business_types,android.R.layout.simple_spinner_item);
         businessTypeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         businessTypeSpinner.setAdapter(businessTypeSpinnerAdapter);
@@ -140,6 +139,14 @@ public class MainActivity2 extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long l)
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
+                if (abl.task2.getStatus() == AsyncTask.Status.FINISHED)
+                {
+                    System.out.println("Hash Is : "+businessTable);
+                    int businessId=businessTable.get(itemSelectedInSpinner.toString());
+                    System.out.println("\nbusinessId Is :"+businessId+ "\n" );
+                    abl.getBranches(getActivity(),getContext(),businessId);
+                    //Finish .. Sentd Activity By A method
+                }
                 //TODO add somethimg here
             }
 
@@ -166,6 +173,11 @@ public class MainActivity2 extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long l)
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
+                if (abl.task3.getStatus() == AsyncTask.Status.FINISHED)
+                {
+                     branchId=branchTable.get(itemSelectedInSpinner.toString());
+                    //Finish .. Sentd Activity By A method
+                }
                 //TODO add somethimg here
             }
 
@@ -182,7 +194,7 @@ public class MainActivity2 extends Activity {
         i.putExtra("name",businessTypeSpinner.getSelectedItem().toString()+" "+
                 branchTypeSpinner.getSelectedItem().toString() +" "+
                 cityTypeSpinner.getSelectedItem().toString());
-       // i.putExtra("time", user.getUserFullName());
+        i.putExtra("branchId",  branchId);
         Log.d(cityTypeSpinner.getSelectedItem().toString(), "");
         startActivity(i);
     }

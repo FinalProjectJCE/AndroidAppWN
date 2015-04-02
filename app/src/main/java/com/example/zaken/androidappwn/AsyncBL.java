@@ -12,40 +12,26 @@ import java.util.ArrayList;
  */
 public class AsyncBL
 {
-    static String tryMe="In AsyncBL Start";
     Async task;
     Async task2;
+    Async task3;
     static ArrayList<String> keysList;
     public void getCities(Activity activity,Context context)
     {
-        tryMe="Inside Get Cities";
-         task = new Async(1,activity,context,"","");
-        System.out.println("\nBefore execute "+tryMe+"\n");
+        task = new Async(1,activity,context,0,"");
         task.execute();
-        System.out.println("\nAfter execute "+tryMe+"\n");
-
         keysList = new ArrayList<String>();
-
-        if(task.getStatus() == AsyncTask.Status.FINISHED)
-        {
-            System.out.println("\nFini\n");
-        }
-
-        System.out.println("\nPPLPLPLPLPLP\n");
-        for(int i=0;i<keysList.size();i++) {
-            System.out.println("\nPPLPLPLPLPLP"+i+"\n");
-            System.out.println(keysList.get(i));
-        }
-        System.out.println("\nPPLPLPLPLPLP\n");
-    }
-    public void BB(String s)
-    {
-        System.out.println("\n"+s+"\n");
     }
 
-    public void getBusiness(Activity activity,Context context,String city)
+    public void getBusiness(Activity activity,Context context, int cityId)
     {
-        task2 = new Async(2,activity,context,city,"");
+        task2 = new Async(2,activity,context,cityId,"");
         task2.execute();
+    }
+
+    public void getBranches(Activity activity,Context context, int cityId)
+    {
+        task3 = new Async(3,activity,context,cityId,"");
+        task3.execute();
     }
 }

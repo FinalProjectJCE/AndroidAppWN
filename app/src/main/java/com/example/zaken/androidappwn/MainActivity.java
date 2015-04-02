@@ -13,6 +13,21 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.text.AndroidCharacter;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.content.Intent;
+import android.os.AsyncTask;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public class MainActivity extends Activity {
@@ -46,7 +61,7 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
     public void choose_business(View view){
-        Intent i=new Intent(this,MainActivity2.class);
+        Intent i = new Intent(this,MainActivity2.class);
         startActivity(i);
     }
 

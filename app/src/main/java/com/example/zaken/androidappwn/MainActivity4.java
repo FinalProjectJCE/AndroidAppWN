@@ -149,7 +149,7 @@ public class MainActivity4 extends Activity {
         protected void onProgressUpdate(Integer... progress) {
             currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
             totalQueueDisplay.setText(Integer.toString(progress[1]-progress[0]));
-            if (userQueueNum==0) {
+            if (userQueueNum == 0) {
                 userQueueNum = progress[1] + 1;
                 userQueueDisplay.setText(Integer.toString(userQueueNum));
             }
