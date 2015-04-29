@@ -123,7 +123,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:textAppearance="?android:attr/textAppearanceLarge"
-         android:text="במידה ותקח תור עכשיו, הזמן המשוער לקבלת התור יהיה: 18 דקות"
+         android:text="במידה ותקח תור עכשיו, הזמן המשוער לקבלת התור יהיה : "
          android:id="@+id/estimate_time"
          android:textSize="20dp"
          android:layout_weight="1"
@@ -141,5 +141,14 @@
          android:layout_below="@+id/separated_line1"
          android:layout_above="@+id/separated_line2"
          android:padding="20dp" />
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="00:00"
+         android:id="@+id/timeTextView"
+         android:layout_alignBottom="@+id/estimate_time"
+         android:layout_alignParentEnd="true"
+         android:layout_alignParentStart="true" />
 
  </RelativeLayout>

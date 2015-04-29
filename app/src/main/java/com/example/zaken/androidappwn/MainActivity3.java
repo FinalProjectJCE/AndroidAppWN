@@ -41,7 +41,6 @@ public class MainActivity3 extends Activity {
         String name = intent.getStringExtra("name");
         branchId = intent.getIntExtra("branchId",0);
         business_name.setText(name);
-        System.out.print("\nON CREATE!!!!!!!!!!!!! \n");
         setActivity(this);
         qbl=new QueueBL();
         qbl.showQueue(getActivity(),getContext(),branchId);
@@ -95,6 +94,7 @@ public class MainActivity3 extends Activity {
         //UPDATE Queue SET CurrentQueue = CurrentQueue + 1 WHERE BusinessId = '111'"
         Intent i=new Intent(this,MainActivity4.class);
         i.putExtra("businessNameFromIntent",business_name.getText());
+        i.putExtra("branchId",  branchId);
         startActivity(i);
     }
 
