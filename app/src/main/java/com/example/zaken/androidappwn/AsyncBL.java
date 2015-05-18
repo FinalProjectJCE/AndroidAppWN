@@ -13,25 +13,9 @@ import java.util.ArrayList;
 public class AsyncBL
 {
     Async task;
-    Async task2;
-    Async task3;
-    static ArrayList<String> keysList;
     public void getCities(Activity activity,Context context)
     {
-        task = new Async(1,activity,context,0,"");
+        task = new Async(activity,context);
         task.execute();
-        keysList = new ArrayList<String>();
-    }
-
-    public void getBusiness(Activity activity,Context context, int cityId)
-    {
-        task2 = new Async(2,activity,context,cityId,"");
-        task2.execute();
-    }
-
-    public void getBranches(Activity activity,Context context, int cityId)
-    {
-        task3 = new Async(3,activity,context,cityId,"");
-        task3.execute();
     }
 }

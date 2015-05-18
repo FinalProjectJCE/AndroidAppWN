@@ -23,7 +23,6 @@ import java.sql.Statement;
 public class MainActivity4 extends Activity {
 
     TextView business_name_in_queue, current_line_in_queue, totalQueueDisplay, currentQueueDisplay_in_queue, userQueueDisplay;
-    //SendQueryAsync task,task2;
     Activity activity;
     Context context;
     TotalQueuesBL tqb;
