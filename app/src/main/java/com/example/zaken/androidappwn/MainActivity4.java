@@ -3,6 +3,7 @@ package com.example.zaken.androidappwn;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -26,8 +27,10 @@ public class MainActivity4 extends Activity {
     Activity activity;
     Context context;
     TotalQueuesBL tqb;
-    int branchId;
-    public static int userQueueNum ;
+    int branchId,tempLine;
+    public static int userQueueNum,i ;
+    private SharedPreferences.Editor editor;
+    SharedPreferences userLine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +47,24 @@ public class MainActivity4 extends Activity {
         branchId = intent.getIntExtra("branchId",0);
         userQueueNum=0;
         business_name_in_queue.setText(businessNameFromIntent);
-
         setActivity(this);
         tqb = new TotalQueuesBL();
         tqb.showQueue(getActivity(), getContext(), branchId);
-        userQueueDisplay.setText(Integer.toString(userQueueNum));
+        //userQueueDisplay.setText(Integer.toString(userQueueNum));
+
+        userLine = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
+        tempLine = userLine.getInt("THE_LINE",0);
+        if (tempLine==0)
+            Log.d("tempLine OnCr Is ZERO",""+tempLine);
+        else
+            Log.d("tempLine OnCr NOT ZERO",""+tempLine);
+        editor=userLine.edit();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.e("Line Num Is","Static userQueueNum"+userQueueNum);
+        super.onResume();
     }
 
     private Context getContext() {
@@ -103,4 +119,17 @@ public class MainActivity4 extends Activity {
 
         finish();
     }
+
+    public void buttonListener(View view) {
+        int j=0;
+        j++;
+        Log.d("i Is",""+j);
+        editor.putInt("THE_LINE",j).apply();
+    }
+
+    public void setUserLine(int lineNum)
+    {
+        editor.putInt("THE_LINE",lineNum).apply();
+    }
+
 }

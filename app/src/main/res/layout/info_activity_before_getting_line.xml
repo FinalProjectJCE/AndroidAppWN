@@ -177,7 +177,8 @@
                     android:id="@+id/button5"
                     android:textStyle="bold|italic"
                     android:textSize="20dp"
-                    android:layout_weight="0.5" />
+                    android:layout_weight="0.5"
+                    android:onClick="testForInLine" />
 
                 <Button
                     android:layout_width="match_parent"

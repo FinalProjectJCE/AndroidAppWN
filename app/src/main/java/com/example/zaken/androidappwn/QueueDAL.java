@@ -2,6 +2,7 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
@@ -25,6 +26,8 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
     private TextView averageTextView;
     private TextView waitingClients;
     private String DB_URL,USER,PASS;
+    private SharedPreferences.Editor editor;
+
 
     public QueueDAL(Activity activity,Context context,int branchId) {
         this.activity = activity;
@@ -36,6 +39,7 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
         DB_URL = DatabaseConstants.DB_URL;
         PASS= DatabaseConstants.PASS;
         USER=DatabaseConstants.USER;
+
     }
 
     @Override

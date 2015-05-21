@@ -27,10 +27,13 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     final long MIN_TIME_FOR_UPDATE=5000; // The Time For The Update Is 5 Seconds
     final long MIN_DIS_FOR_UPDATES=10; // The Distance Will Be 10 Meter
     private LocationManager lm;
-    private double longitude=35.2026885;
-    private double latitude=31.7555136;
+    private double longitude;
+    private double latitude;
     private SweetAlertDialog pDialog;
     private LocationListener thisLocationListener;
+    private DB database = new DB(this);
+    private int distanceFromDB;
+
 
 
     @Override
@@ -42,12 +45,17 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
         branchId = intent.getIntExtra("branchId",0);
+        latitude = database.getLatitude(branchId);
+        Log.d("latitude",""+latitude);
+        longitude=database.getLongitude(branchId);
+        Log.d("longi",""+longitude);
+        distanceFromDB=database.getDistance(branchId);
+        Log.d("distance",""+distanceFromDB);
         businessName.setText(name);
         setActivity(this);
         qbl=new QueueBL();
         qbl.showQueue(getActivity(),getContext(),branchId);
         thisLocationListener=this;
-
         }
     private Context getContext()
     {
@@ -93,6 +101,14 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         qbl.showQueue(getActivity(),getContext(),branchId);
     }
 
+    public void testForInLine(View view)
+    {
+        Intent i=new Intent(this,MainActivity4.class);
+        i.putExtra("businessNameFromIntent",businessName.getText());
+        i.putExtra("branchId",  branchId);
+        startActivity(i);
+    }
+
     public void getQueueButtonClick(final View view)
     {
         lm.requestLocationUpdates(lm.GPS_PROVIDER,MIN_TIME_FOR_UPDATE,MIN_DIS_FOR_UPDATES,this);
@@ -133,7 +149,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
             distance = location.distanceTo(businessLocation);
             String notice = "The Distance Between Is \n" + distance;
             Toast.makeText(this, notice, Toast.LENGTH_LONG).show();
-            if (distance < 250) {
+            if (distance < distanceFromDB) {
                 Intent i = new Intent(this, MainActivity4.class);
                 pDialog.cancel();
                 lm.removeUpdates(this);

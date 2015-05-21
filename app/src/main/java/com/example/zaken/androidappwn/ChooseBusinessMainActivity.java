@@ -130,6 +130,9 @@ public class ChooseBusinessMainActivity extends Activity {
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
                 chosenBranch =itemSelectedInSpinner.toString();
+                Log.e("The Branch Is",""+chosenBranch);
+
+
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
@@ -144,6 +147,7 @@ public class ChooseBusinessMainActivity extends Activity {
                 cityTypeSpinner.getSelectedItem().toString());
         int businessId = database.getBusinessId(chosenCity,chosenBusiness, chosenBranch);
         branchId=businessId;
+        Log.e("The Business Id Is+",""+branchId);
         i.putExtra("branchId",  branchId);
         Log.d(cityTypeSpinner.getSelectedItem().toString(), "");
         startActivity(i);

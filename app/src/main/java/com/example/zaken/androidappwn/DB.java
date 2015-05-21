@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -29,6 +31,9 @@ public class DB extends SQLiteOpenHelper {
                 DatabaseConstants.MAIN_ID + " INTEGER," +
                 DatabaseConstants.CITIES + " TEXT_TYPE," +
                 DatabaseConstants.BUSINESS + " TEXT_TYPE," +
+                DatabaseConstants.LATITUDE + " DOUBLE," +
+                DatabaseConstants.LONGITUDE + " DOUBLE," +
+                DatabaseConstants.DISTANCE + " INTEGER," +
                 DatabaseConstants.BRANCH +" TEXT_TYPE);");
     }
 
@@ -39,13 +44,16 @@ public class DB extends SQLiteOpenHelper {
 
 //
 
-    public void insertToDB(String city, String business, int id, String branch) {
+    public void insertToDB(String city, String business, int id, String branch , double latitude,double longitude,int distance) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(DatabaseConstants.MAIN_ID, id);
         values.put(DatabaseConstants.CITIES, city);
         values.put(DatabaseConstants.BUSINESS, business);
         values.put(DatabaseConstants.BRANCH, branch);
+        values.put(DatabaseConstants.LATITUDE,latitude);
+        values.put(DatabaseConstants.LONGITUDE,longitude);
+        values.put(DatabaseConstants.DISTANCE,distance);
         db.insertOrThrow(DatabaseConstants.TABLE_NAME, null, values);
         db.close();
     }
@@ -82,12 +90,56 @@ public class DB extends SQLiteOpenHelper {
 
     }
 
-    public int getBusinessId(String choosenCity, String chosenBusiness, String choosenBranch) {
+    public int getBusinessId(String choosenCity, String chosenBusiness, String chosenBranch) {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.MAIN_ID + " FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.CITIES + "= '" + choosenCity + "' AND "+DatabaseConstants.BUSINESS + "= '" + chosenBusiness + "' AND "+DatabaseConstants.BUSINESS + "= '" + chosenBusiness + "' ", null);
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.MAIN_ID + " FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.CITIES + "= '" + choosenCity + "' AND "+DatabaseConstants.BUSINESS + "= '" + chosenBusiness + "' AND "+DatabaseConstants.BRANCH + "= '" + chosenBranch + "' ", null);
         c.moveToNext();
         return c.getInt(0);
     }
+
+    public double[] getCoordinatesAndDistance(int businessId) {
+        double[] toReturn=new double[3];
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.LATITUDE+", " +
+                DatabaseConstants.LONGITUDE+", " +DatabaseConstants.DISTANCE +" FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.MAIN_ID + "= '" + businessId + "'", null);
+        c.moveToNext();
+        toReturn[0]=c.getDouble(0);
+        Log.d("c.getDouble(0);", c.getDouble(0) + "");
+        toReturn[1]=c.getDouble(1);
+        Log.d("c.getDouble(1);", c.getDouble(1) + "");
+        toReturn[2]=c.getDouble(2);
+        Log.d("c.getDouble(2);", c.getDouble(2) + "");
+        return toReturn;
+    }
+
+    public double getLongitude(int businessId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.LONGITUDE + " FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.MAIN_ID + "= '" + businessId + "'", null);
+        c.moveToNext();
+        return c.getDouble(0);
+    }
+
+    public double getLatitude(int businessId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.LATITUDE + " FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.MAIN_ID + "= '" + businessId + "'", null);
+        c.moveToNext();
+        return c.getDouble(0);
+    }
+
+    public int getDistance(int businessId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.DISTANCE + " FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.MAIN_ID + "= '" + businessId + "'", null);
+        c.moveToNext();
+        return c.getInt(0);
+    }
+
 }
