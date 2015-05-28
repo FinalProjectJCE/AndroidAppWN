@@ -2,6 +2,7 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,11 +17,27 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 public class Entry extends Activity {
+    SharedPreferences sharedPrefQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.entry_activity);
+        sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
+        int userQueue = sharedPrefQueue.getInt("THE_LINE",0);
+        int branchId = sharedPrefQueue.getInt("BRANCH_ID",0);
+        String busName = sharedPrefQueue.getString("BUSINESS_NAME","noName");
+        Log.d("On Entry, User Queue Is",""+userQueue);
+        Log.d("On Entry, Branch Id Is",""+branchId);
+        Log.d("On Entry, Busi Name Is",""+busName);
+        if(userQueue!=0)
+        {
+            Intent i=new Intent(this,MainActivity4.class);
+            i.putExtra("businessNameFromIntent",busName);
+            i.putExtra("branchId", branchId);
+            startActivity(i);
+        }
+
     }
 
 
@@ -63,11 +80,28 @@ public class Entry extends Activity {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
+
+                if(isInteger(result.getContents()))
+                {
+                     Intent i=new Intent(this,MainActivity4.class);
+                     i.putExtra("businessNameFromIntent","Need To Fix Name From QR");
+                     i.putExtra("branchId",  Integer.parseInt(result.getContents()));
+                     startActivity(i);
+                }
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
         } else {
             // This is important, otherwise the result will not be passed to the fragment
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public boolean isInteger(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
         }
     }
 

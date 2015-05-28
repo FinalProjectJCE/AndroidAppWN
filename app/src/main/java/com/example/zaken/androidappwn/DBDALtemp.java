@@ -2,6 +2,7 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
@@ -12,26 +13,31 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
+import static com.example.zaken.androidappwn.MainActivity4.*;
+
 /**
  * Created by Zaken on 02/04/2015.
  */
-public class DBDAL extends AsyncTask<String,Integer,Integer>
+public class DBDALtemp extends AsyncTask<String,Integer,Integer>
 {
-    private final Activity activity;
-    private final Context context;
+    public   Activity activity;
+    public Context context;
     private int branchId;
+    MainActivity4 m;
     TextView userQueueDisplay,currentQueueDisplay_in_queue,totalQueueDisplay;
     String DB_URL = "jdbc:mysql://f37fa280-507d-4166-b70e-a427013f0c94.mysql.sequelizer.com:3306/dbf37fa280507d4166b70ea427013f0c94";
     String USER = "lewtprebbcrycgkb";
     String PASS = "S5zS2ExvQqZQrUK8dwSJvpv5dSvED4RwmijLrG55TEesXBTrAR3QDXPCGDPijZZU";
 
-    public DBDAL(Activity activity,Context context,int branchId) {
+    public DBDALtemp(MainActivity4 activity, Context context, int branchId) {
         this.activity = activity;
         this.context=context;
         this.branchId=branchId;
         userQueueDisplay = (TextView) activity.findViewById(R.id.userQueueDisplay);
         currentQueueDisplay_in_queue=(TextView) activity.findViewById(R.id.currentQueueDisplay_in_queue);
         totalQueueDisplay = (TextView) activity.findViewById(R.id.totalQueueDisplay);
+        activity.setSharedPrefQueue(4);
+
     }
 
     @Override
@@ -68,13 +74,15 @@ public class DBDAL extends AsyncTask<String,Integer,Integer>
     }
 
     protected void onProgressUpdate(Integer... progress) {
+
         currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
         totalQueueDisplay.setText(Integer.toString(progress[1]-progress[0]));
-        if (MainActivity4.userQueueNum == 0) {
-            MainActivity4.userQueueNum = progress[1] + 1;
-            userQueueDisplay.setText(Integer.toString(MainActivity4.userQueueNum));
-        }
+        
 
+//        if (userQueueNum == 0) {
+//            userQueueNum = progress[1] + 1;
+//            userQueueDisplay.setText(Integer.toString(userQueueNum));
+//        }
 
 
     }

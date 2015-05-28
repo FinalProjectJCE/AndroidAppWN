@@ -20,7 +20,7 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
     private final Activity activity;
     private final Context context;
     private int branchId;
-    TextView userQueueDisplay,currentQueueDisplay_in_queue,totalQueueDisplay;
+    TextView currentQueueDisplay_in_queue,totalQueueDisplay;
     String DB_URL = "jdbc:mysql://f37fa280-507d-4166-b70e-a427013f0c94.mysql.sequelizer.com:3306/dbf37fa280507d4166b70ea427013f0c94";
     String USER = "lewtprebbcrycgkb";
     String PASS = "S5zS2ExvQqZQrUK8dwSJvpv5dSvED4RwmijLrG55TEesXBTrAR3QDXPCGDPijZZU";
@@ -29,7 +29,6 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
         this.activity = activity;
         this.context=context;
         this.branchId=branchId;
-        userQueueDisplay = (TextView) activity.findViewById(R.id.userQueueDisplay);
         currentQueueDisplay_in_queue=(TextView) activity.findViewById(R.id.currentQueueDisplay_in_queue);
         totalQueueDisplay = (TextView) activity.findViewById(R.id.totalQueueDisplay);
     }
@@ -44,15 +43,12 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
             String result = "\nDatabase connection success\n";
             Statement st = con.createStatement();
             Statement st2 = con.createStatement();
-            //System.out.println("\nsqlQ[0] : " + sqlQ[0] + "\n");
             while(running) {
                 String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
                 String query2 = "SELECT TotalQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
                 ResultSet rs = st.executeQuery(query);
                 ResultSet rs2 = st2.executeQuery(query2);
                 ResultSetMetaData rsmd = rs.getMetaData();
-                //System.out.println("\nsqlQ[0] : " + sqlQ[0] + "\n");
-                //System.out.println("\nsqlQ[0] : " + sqlQ[1] + "\n");
 
                 while (rs.next()&& rs2.next()) {
                     int currentQueue = rs.getInt("CurrentQueue");
@@ -73,12 +69,8 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
     }
 
     protected void onProgressUpdate(Integer... progress) {
+        int waitingClients = progress[1]-progress[0]-1; // Minus The User On The Waiting Clients
         currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
-        totalQueueDisplay.setText(Integer.toString(progress[1]-progress[0]));
-        if (MainActivity4.userQueueNum == 0) {
-            MainActivity4.userQueueNum = progress[1] + 1;
-            userQueueDisplay.setText(Integer.toString(MainActivity4.userQueueNum));
-        }
-
+        totalQueueDisplay.setText(Integer.toString(waitingClients));
     }
 }

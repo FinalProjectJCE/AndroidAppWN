@@ -151,6 +151,8 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
             Toast.makeText(this, notice, Toast.LENGTH_LONG).show();
             if (distance < distanceFromDB) {
                 Intent i = new Intent(this, MainActivity4.class);
+                i.putExtra("businessNameFromIntent","From GPS");
+                i.putExtra("branchId", branchId );
                 pDialog.cancel();
                 lm.removeUpdates(this);
                 startActivity(i);

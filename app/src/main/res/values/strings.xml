@@ -22,6 +22,7 @@
     <string name="estimatedTimeText">במידה ותקח תור עכשיו, הזמן המשוער לקבלת התור יהיה : </string>
     <string name="businessNameText">שם העסק</string>
     <string name="getLineButtonText">קבל תור</string>
+    <string name="title_activity_alarm_main">AlarmMainActivity</string>
 
 
 </resources>

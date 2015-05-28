@@ -1,43 +1,38 @@
 package com.example.zaken.androidappwn;
 
 import android.app.Activity;
-
-import android.content.Intent;
+import android.media.MediaPlayer;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 
-public class Logo extends Activity {
-
-    Handler mHandler;
-    Runnable mNextActivityCallback;
-    AsyncBL abl;
-
+public class AlarmMainActivity extends Activity {
+    private Window wind;
+    private MediaPlayer alarmSound;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_logo);
-        abl=new AsyncBL();
-        abl.getCities(this,this);
-        mHandler = new Handler();
-        mNextActivityCallback = new Runnable() {
-            @Override
-            public void run() {
-                // Intent to jump to the next activity
-                Intent i= new Intent(Logo.this,Entry.class);
-                startActivity(i);
-                finish(); // so the splash activity goes away
-            }
-        };
-        mHandler.postDelayed(mNextActivityCallback, 3000L);
+        setContentView(R.layout.alarm_main);
+        wind = this.getWindow();
+        wind.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        wind.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        wind.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        alarmSound = MediaPlayer.create(this,R.raw.alarm);
+        alarmSound.start();
+//        Window window = this.getWindow();
+//        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+//        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_logo, menu);
+        getMenuInflater().inflate(R.menu.menu_alarm_main, menu);
         return true;
     }
 
@@ -52,15 +47,13 @@ public class Logo extends Activity {
         if (id == R.id.action_settings) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) {
-            mHandler.removeCallbacks(mNextActivityCallback);
-        }
+        alarmSound.release();
     }
 }
-
