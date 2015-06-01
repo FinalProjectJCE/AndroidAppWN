@@ -142,4 +142,14 @@ public class DB extends SQLiteOpenHelper {
         return c.getInt(0);
     }
 
+    public String getBusinessName(int businessId)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT DISTINCT " + DatabaseConstants.BUSINESS+", " +
+                DatabaseConstants.BRANCH+", " +DatabaseConstants.CITIES +" FROM " + DatabaseConstants.TABLE_NAME  + " WHERE " + DatabaseConstants.MAIN_ID + "= '" + businessId + "'", null);
+        c.moveToNext();
+        return c.getString(0) + " " + c.getString(1) + " " +
+                c.getString(2) ;
+    }
+
 }

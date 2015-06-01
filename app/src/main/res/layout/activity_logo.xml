@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
         android:src="@drawable/logo"
-        android:scaleType = "fitXY"
+        android:scaleType = "centerCrop"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />

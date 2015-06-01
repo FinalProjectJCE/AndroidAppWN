@@ -54,6 +54,6 @@ public class AlarmMainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        alarmSound.release();
+        //alarmSound.release();
     }
 }

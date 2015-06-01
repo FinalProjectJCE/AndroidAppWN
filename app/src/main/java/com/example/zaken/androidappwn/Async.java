@@ -52,13 +52,13 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
                 while (rs.next())
                 {
                     data.insertToDB(rs.getString(cityForDB), rs.getString(businessForDB), rs.getInt(idForDB), rs.getString(branchForDB),rs.getDouble(latitudeForDB),rs.getDouble(longitudeForDB),rs.getInt(distanceForDB));
-                    Log.d("idForDB",rs.getInt(idForDB)+"");
-                    Log.d("cityForDB",rs.getString(cityForDB));
-                    Log.d("businessForDB",rs.getString(businessForDB));
-                    Log.d("branchForDB",rs.getString(branchForDB));
-                    Log.d("Longitude",rs.getDouble(longitudeForDB)+"");
-                    Log.d("Latitude",rs.getDouble(latitudeForDB)+"");
-                    Log.d("Distance",rs.getInt(distanceForDB)+"");
+//                    Log.d("idForDB",rs.getInt(idForDB)+"");
+//                    Log.d("cityForDB",rs.getString(cityForDB));
+//                    Log.d("businessForDB",rs.getString(businessForDB));
+//                    Log.d("branchForDB",rs.getString(branchForDB));
+//                    Log.d("Longitude",rs.getDouble(longitudeForDB)+"");
+//                    Log.d("Latitude",rs.getDouble(latitudeForDB)+"");
+//                    Log.d("Distance",rs.getInt(distanceForDB)+"");
                 }
 
         } catch (Exception e) {

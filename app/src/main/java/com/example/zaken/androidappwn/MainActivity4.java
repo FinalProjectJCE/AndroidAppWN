@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 
 public class MainActivity4 extends Activity {
@@ -29,10 +32,12 @@ public class MainActivity4 extends Activity {
     int branchId, userQueue;
     private SharedPreferences.Editor editor;
     SharedPreferences sharedPrefQueue;
-    boolean asyncIsRunning;
+    private boolean asyncIsRunning;
     String businessNameFromIntent;
     Intent noticeServiceIntent;
     boolean run;
+    private Button alertButton;
+    private boolean alertOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,9 @@ public class MainActivity4 extends Activity {
         setContentView(R.layout.activity_main_activity4);
         business_name_in_queue = (TextView) findViewById(R.id.business_name_in_queue);
         userQueueDisplay = (TextView) findViewById(R.id.userQueueDisplay);
+        alertButton=(Button)findViewById(R.id.getNoticeButton);
+        noticeServiceIntent = new Intent(this, NoticeService.class);
+
 
         Intent intent = getIntent();
         businessNameFromIntent = intent.getStringExtra("businessNameFromIntent");
@@ -50,6 +58,7 @@ public class MainActivity4 extends Activity {
 
         sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         userQueue = sharedPrefQueue.getInt("THE_LINE",0);
+        alertOn=sharedPrefQueue.getBoolean("ALERT_ON",false);
         if (userQueue ==0) {
             Log.d("Initial Of The Shared ", "" + userQueue);
             Log.d("Starting Async ", "");
@@ -64,6 +73,14 @@ public class MainActivity4 extends Activity {
                 Log.d("Not Starting Async", "");
                 userQueueDisplay.setText(Integer.toString(sharedPrefQueue.getInt("THE_LINE",0)));
                 asyncIsRunning=false;
+                Log.d("get(ALERT_ON,true)", ""+sharedPrefQueue.getBoolean("ALERT_ON",false));
+
+                if(alertOn) {
+                    Log.d("get(ALERT_ON,true)", "בטל תור");
+
+                    alertButton.setText("בטל התראה");
+
+                }
 
             }
         editor = sharedPrefQueue.edit();
@@ -131,18 +148,38 @@ public class MainActivity4 extends Activity {
         if(asyncIsRunning)
             getLineAsync.cancel(true);
         finish();
-
     }
 
     public void buttonListener(View view) { // Notice Button
-        if (userQueue !=0) {
+        Log.d("Alert Button Pressed", "");
+
+        if ( (userQueue !=0) && (!alertOn) ) {
+
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("ההתראה נוצרה בהצלחה!")
+                    .setContentText("כאשר תורך יתקרב תקבל התראה למכשיר")
+                    .show();
+            editor.putBoolean("ALERT_ON",true).apply();
+            alertOn=true;
+            alertButton.setText("בטל התראה");
             noticeServiceIntent = new Intent(this, NoticeService.class);
             noticeServiceIntent.putExtra("branchId", branchId);
             noticeServiceIntent.putExtra("userQueue", userQueue);
             startService(noticeServiceIntent);
             Log.d("ButtonPressed", "");
-
             run = true;
+        }
+        else if (alertOn)
+        {
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("ההתראה בוטלה!")
+                    .setContentText("כעת לא תקבל התראה למכשיר!")
+                    .show();
+            stopService(noticeServiceIntent);
+            editor.putBoolean("ALERT_ON",false).apply();
+            alertOn=false;
+            alertButton.setText("קבל התראה");
+            run=false;
         }
     }
 

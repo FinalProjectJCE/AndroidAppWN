@@ -33,7 +33,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     private LocationListener thisLocationListener;
     private DB database = new DB(this);
     private int distanceFromDB;
-
+    private String businessNameFromIntent;
 
 
     @Override
@@ -43,7 +43,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         businessName = (TextView) findViewById(R.id.businessNameTV);
         Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
+        businessNameFromIntent = intent.getStringExtra("name");
         branchId = intent.getIntExtra("branchId",0);
         latitude = database.getLatitude(branchId);
         Log.d("latitude",""+latitude);
@@ -51,7 +51,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         Log.d("longi",""+longitude);
         distanceFromDB=database.getDistance(branchId);
         Log.d("distance",""+distanceFromDB);
-        businessName.setText(name);
+        businessName.setText(businessNameFromIntent);
         setActivity(this);
         qbl=new QueueBL();
         qbl.showQueue(getActivity(),getContext(),branchId);
@@ -151,7 +151,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
             Toast.makeText(this, notice, Toast.LENGTH_LONG).show();
             if (distance < distanceFromDB) {
                 Intent i = new Intent(this, MainActivity4.class);
-                i.putExtra("businessNameFromIntent","From GPS");
+                i.putExtra("businessNameFromIntent",businessNameFromIntent+" From GPS");
                 i.putExtra("branchId", branchId );
                 pDialog.cancel();
                 lm.removeUpdates(this);

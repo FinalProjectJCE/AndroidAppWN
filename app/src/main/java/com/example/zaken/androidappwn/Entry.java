@@ -18,6 +18,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class Entry extends Activity {
     SharedPreferences sharedPrefQueue;
+    private DB database = new DB(this);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +64,13 @@ public class Entry extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
     public void choose_business(View view){
         Intent i = new Intent(this,ChooseBusinessMainActivity.class);
         startActivity(i);
     }
 
-
     public void scan(View view){
-        Log.e("Lior","Scan");
         new IntentIntegrator(this).initiateScan();
     }
 
@@ -83,9 +84,12 @@ public class Entry extends Activity {
 
                 if(isInteger(result.getContents()))
                 {
+                     String businessNameFromDB;
+                     int branchIdFromScan = Integer.parseInt(result.getContents());
                      Intent i=new Intent(this,MainActivity4.class);
-                     i.putExtra("businessNameFromIntent","Need To Fix Name From QR");
-                     i.putExtra("branchId",  Integer.parseInt(result.getContents()));
+                     businessNameFromDB=database.getBusinessName(branchIdFromScan);
+                     i.putExtra("branchId",  branchIdFromScan);
+                     i.putExtra("businessNameFromIntent",businessNameFromDB+" From QR");
                      startActivity(i);
                 }
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
