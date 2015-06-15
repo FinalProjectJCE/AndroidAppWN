@@ -41,7 +41,9 @@
             android:label="@string/title_activity_main_activity4" >
         </activity>
 
-        <service android:name=".NoticeService" />
+        <service android:name=".ClientsAlertService" />
+        <service android:name=".TimeAlertService" />
+
 
         <activity
             android:name=".AlarmMainActivity"

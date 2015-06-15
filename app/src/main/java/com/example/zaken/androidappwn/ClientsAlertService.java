@@ -2,6 +2,7 @@ package com.example.zaken.androidappwn;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -13,16 +14,17 @@ import java.sql.Statement;
 /**
  * Created by Zaken on 28/05/2015.
  */
-public class NoticeService extends Service {
+public class ClientsAlertService extends Service {
 
     Thread myTread;
     boolean run;
-    int branchId,userQueue;
+    int branchId,userQueue,userChoice;
     String DB_URL =DatabaseConstants.DB_URL;
     String USER = DatabaseConstants.USER;
     String PASS = DatabaseConstants.PASS;
+    private SharedPreferences sharedPrefQueue;
 
-    public NoticeService()
+    public ClientsAlertService()
     {
 
     }
@@ -39,8 +41,13 @@ public class NoticeService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("onStartCommand", "");
 
-            branchId = intent.getIntExtra("branchId", 0);
-            userQueue = intent.getIntExtra("userQueue", 0);
+        sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
+        userQueue = sharedPrefQueue.getInt("THE_LINE",0);
+        branchId=sharedPrefQueue.getInt("BRANCH_ID",0);
+        userChoice=sharedPrefQueue.getInt("USER_CLIENT_CHOICE",0)+1;
+
+            //branchId = intent.getIntExtra("branchId", 0);
+            //userQueue = intent.getIntExtra("userQueue", 0);
             if (!run) {
                 run = true;
                 Log.d("On Service Loop", "");
@@ -66,9 +73,10 @@ public class NoticeService extends Service {
                                         Log.d("User Queue Is", "" + userQueue);
                                         int g = userQueue - currentQueue;
                                         Log.d("uq-cq", "" + g);
-                                        if (userQueue - currentQueue < 11) {
-                                            goToAlarmPage();
+                                        if (userQueue - currentQueue < userChoice) {
                                             onDestroy();
+
+                                            goToAlarmPage();
                                         }
 
                                     }
@@ -90,19 +98,17 @@ public class NoticeService extends Service {
             } else {
                 branchId = intent.getIntExtra("branchId", 0);
             }
-            return START_REDELIVER_INTENT;
+            return START_STICKY;
 
         }
 
 
     public void goToAlarmPage()
     {
-
         Intent alarm = new Intent();
         alarm.setClass(this,AlarmMainActivity.class);
         alarm.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(alarm);
-
     }
     @Override
     public IBinder onBind(Intent intent) {
@@ -112,8 +118,9 @@ public class NoticeService extends Service {
     @Override
     public void onDestroy() {
         Log.d("Kill The Tread", "");
-
         run=false;
         super.onDestroy();
+        stopSelf();
+
     }
 }

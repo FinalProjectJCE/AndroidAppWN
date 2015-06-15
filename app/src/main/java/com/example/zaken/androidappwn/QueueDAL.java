@@ -27,9 +27,11 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
     private TextView waitingClients;
     private String DB_URL,USER,PASS;
     private SharedPreferences.Editor editor;
+    private QueueBL qbl;
 
 
-    public QueueDAL(Activity activity,Context context,int branchId) {
+    public QueueDAL(QueueBL qbl,Activity activity,Context context,int branchId) {
+        this.qbl=qbl;
         this.activity = activity;
         this.context=context;
         this.branchId=branchId;
@@ -53,22 +55,30 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
             Statement st = con.createStatement();
             Statement st2 = con.createStatement();
             Statement st3 = con.createStatement();
+            Statement st4 = con.createStatement();
+
             while(running) {
                 String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
                 String query2 = "SELECT AverageTime FROM Queue WHERE BusinessId = '" + branchId + "'";
                 String query3 = "SELECT TotalQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
+                String query4 = "SELECT NumberOfClerks FROM Queue WHERE BusinessId = '" + branchId + "'";
+
                 ResultSet rs = st.executeQuery(query);
                 ResultSet rs2 = st2.executeQuery(query2);
                 ResultSet rs3 = st3.executeQuery(query3);
-                while (rs.next()&& rs2.next()&& rs3.next()) {
+                ResultSet rs4 = st4.executeQuery(query4);
+
+                while (rs.next()&& rs2.next()&& rs3.next()&& rs4.next()) {
                     int currentQueue = rs.getInt("CurrentQueue");
                     int totalQueue = rs3.getInt("TotalQueue");
-                    Time t=rs2.getTime("AverageTime");
+                    int numOfClerks = rs4.getInt("NumberOfClerks");
+                    //Log.d("Number Of Clerks Is "," "+numOfClerks);
+                    Time time=rs2.getTime("AverageTime");
                     int numOfPeopleForAverage = totalQueue-currentQueue;
                     response = currentQueue;
                     if (numOfPeopleForAverage<1)
                         numOfPeopleForAverage=0;
-                    publishProgress(currentQueue,t,numOfPeopleForAverage);
+                    publishProgress(currentQueue,time,numOfPeopleForAverage,numOfClerks);
 
                 }
                 if(isCancelled())
@@ -83,12 +93,11 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
 
     protected void onProgressUpdate(Object...progress) {
 //
-
+        qbl.setTextViews(progress);
         Time t = (Time) progress[1];
-
-        currentQueueDisplay.setText(progress[0].toString());
-        averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2]));
-        waitingClients.setText(progress[2].toString());
+//        currentQueueDisplay.setText(progress[0].toString());
+//        averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2]));
+//        waitingClients.setText(progress[2].toString());
     }
 
     private String setAverage(int receivedHours, int receivedMinutes, int receivedSeconds,int queueNum) {

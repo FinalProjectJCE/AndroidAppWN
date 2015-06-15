@@ -171,5 +171,36 @@
         android:textAlignment="viewEnd"
         android:layout_toStartOf="@+id/totalQueueText" />
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:id="@+id/separated_line5"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/userQueue" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="הזמן הממוצע עד לקבלת התור"
+        android:id="@+id/textView7"
+        android:layout_below="@+id/userQueue"
+        android:layout_alignStart="@+id/userQueue"
+        android:layout_alignEnd="@+id/linearLayout2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="טוען..."
+        android:id="@+id/timeCounterTV"
+        android:layout_below="@+id/userQueueDisplay"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentBottom="false"
+        android:layout_toStartOf="@+id/userQueue"
+        android:gravity="center" />
+
 </RelativeLayout>
 

@@ -1,7 +1,9 @@
 package com.example.zaken.androidappwn;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -18,6 +20,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -34,31 +38,32 @@ public class MainActivity4 extends Activity {
     SharedPreferences sharedPrefQueue;
     private boolean asyncIsRunning;
     String businessNameFromIntent;
-    Intent noticeServiceIntent;
+    Intent clientAlertServiceIntent,timeAlertServiceIntent;
     boolean run;
     private Button alertButton;
     private boolean alertOn;
+    private TextView timeCounterTV;
+    private SweetAlertDialog chooseAlertType;
+    private CounterClass timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_activity4);
+        sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         business_name_in_queue = (TextView) findViewById(R.id.business_name_in_queue);
         userQueueDisplay = (TextView) findViewById(R.id.userQueueDisplay);
         alertButton=(Button)findViewById(R.id.getNoticeButton);
-        noticeServiceIntent = new Intent(this, NoticeService.class);
-
-
+        timeCounterTV =(TextView)findViewById(R.id.timeCounterTV);
         Intent intent = getIntent();
         businessNameFromIntent = intent.getStringExtra("businessNameFromIntent");
         branchId = intent.getIntExtra("branchId",0);
         business_name_in_queue.setText(businessNameFromIntent);
         tqb = new TotalQueuesBL();
         tqb.showQueue(this, this, branchId);
-
-        sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         userQueue = sharedPrefQueue.getInt("THE_LINE",0);
         alertOn=sharedPrefQueue.getBoolean("ALERT_ON",false);
+
         if (userQueue ==0) {
             Log.d("Initial Of The Shared ", "" + userQueue);
             Log.d("Starting Async ", "");
@@ -67,32 +72,55 @@ public class MainActivity4 extends Activity {
             getLineAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             asyncIsRunning=true;
         }
-            else
+            else // If The User Is Already Has A Line
             {
+                String busNameFromShared = sharedPrefQueue.getString("BUSINESS_NAME","");
+                business_name_in_queue.setText(busNameFromShared);
+
+                setNewCountDown();
+                //restarCountDown
                 Log.d("The Line OnCreate Is", "" + userQueue);
                 Log.d("Not Starting Async", "");
                 userQueueDisplay.setText(Integer.toString(sharedPrefQueue.getInt("THE_LINE",0)));
                 asyncIsRunning=false;
                 Log.d("get(ALERT_ON,true)", ""+sharedPrefQueue.getBoolean("ALERT_ON",false));
 
-                if(alertOn) {
+                boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
+                if(ao) {
                     Log.d("get(ALERT_ON,true)", "בטל תור");
-
                     alertButton.setText("בטל התראה");
-
                 }
-
             }
         editor = sharedPrefQueue.edit();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    private void setNewCountDown() // Set New Countdown When The App Is Re Open After Destroyed
+    {
+        Log.d("Set New Counter","" );
+
+        Long remainingTime=  ( sharedPrefQueue.getLong("CURRENT_TIME_WHEN_DESTROY_APP",0) +sharedPrefQueue.getLong("COUNTER_TIME_WHEN_DESTROY_APP",0) )-System.currentTimeMillis();
+        Log.d("destroydTime",""+sharedPrefQueue.getLong("CURRENT_TIME_WHEN_DESTROY_APP",0));
+        Log.d("LastCounterTime",""+sharedPrefQueue.getLong("COUNTER_TIME_WHEN_DESTROY_APP",0));
+        Log.d("CurrentTime",""+        System.currentTimeMillis());
+        Log.d("Time Remaning",""+ remainingTime+" < 0 ");
+
+        if(remainingTime<0)
+        {
+            timeCounterTV.setText("הזמן תם");
+        }
+        else {
+            Log.d("Set New Timer","");
+            timer = new CounterClass(remainingTime, 1000,this);
+            timer.start();
+        }
     }
 
+
+
+
+
     private Context getContext() {
-        return this.context;
+        return this;
     }
 
     private void setActivity(Activity activity) {
@@ -126,18 +154,101 @@ public class MainActivity4 extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        tqb.task.cancel(true);
+
+        if(timer!=null)
+        {
+            Log.d("Destroyd","");
+            Long millis = parseTimeFromTV(timeCounterTV.getText().toString());
+            editor.putLong("COUNTER_TIME_WHEN_DESTROY_APP", millis).apply();
+            editor.putLong("CURRENT_TIME_WHEN_DESTROY_APP", System.currentTimeMillis()).apply();
+
+        }
+    }
+    @Override
     public void onPause() {
         super.onPause();
         tqb.task.cancel(true);
     }
 
-    public void cancelQueueButtonClick(View view) {
-        //getLineAsync.cancel(true);
-        if(run)
-        {
-            stopService(noticeServiceIntent);
+    public void onRestart(){
+        super.onRestart();
+        tqb.showQueue(this, this, branchId);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //tqb.showQueue(this, this, branchId);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+    }
+
+    public void buttonListener(View view) { // Notice Button
+        Log.d("Alert Button Pressed", "");
+
+        boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
+        if ( (userQueue !=0) && (!ao) ) {
+
+            setChooseAlertDialog();
+            Log.d("ButtonPressed", "");
+            run = true; // Alert Button Is Pressed And No Service Is Running
         }
+        else if (ao)
+        {
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("ההתראה בוטלה!")
+                    .setContentText("כעת לא תקבל התראה למכשיר!")
+                    .show();
+            int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
+            if(serviceType == 0) {
+                Log.d("Stop Time Service Noti","");
+                timeAlertServiceIntent = new Intent(this, TimeAlertService.class);
+                stopService(timeAlertServiceIntent);
+
+
+            }
+            else if(serviceType == 1) {
+                clientAlertServiceIntent = new Intent(this, ClientsAlertService.class);
+
+                stopService(clientAlertServiceIntent);
+                Log.d("Stop Clien Service Noti","");
+            }
+            editor.putBoolean("ALERT_ON",false).apply();
+            alertOn=false;
+            alertButton.setText("קבל התראה");
+            run=false; // Alert Button Is Pressed And Service Is On
+
+        }
+    }
+    public void cancelQueueButtonClick(View view) {//getLineAsync.cancel(true);
+        boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
+        if(timer!=(null))
+        timer.cancel();
+
+        if(ao)
+        {
+            int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
+             if(serviceType == 0) {
+                 Log.d("Stop Time Service Cance","");
+                 timeAlertServiceIntent = new Intent(this, TimeAlertService.class);
+                 stopService(timeAlertServiceIntent);
+
+             }
+            else if(serviceType == 1) {
+                 clientAlertServiceIntent = new Intent(this, ClientsAlertService.class);
+                 stopService(clientAlertServiceIntent);
+                 Log.d("Stop Time Service Cance","");
+             }
+        }
+        editor.putBoolean("ALERT_ON",false).apply();
         editor.putInt("THE_LINE",0).apply();
+        editor.putLong("AVERAGE_TIME",0).apply();
+
         Context context = getApplicationContext();
         CharSequence text = "התור שלך בוטל";
         int duration = Toast.LENGTH_SHORT;
@@ -150,38 +261,169 @@ public class MainActivity4 extends Activity {
         finish();
     }
 
-    public void buttonListener(View view) { // Notice Button
-        Log.d("Alert Button Pressed", "");
+    private void setChooseAlertDialog()
+    {
+        final CharSequence[] items = {
+                "התראה לפי זמן ממוצע", "התראה לפי מספר האנשים בתור"
+        };
 
-        if ( (userQueue !=0) && (!alertOn) ) {
+        final SweetAlertDialog successDialog= new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final int[] flagToReturn = new int[1];
+        builder.setTitle("בחר את סוג ההתראה");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                Log.d("Time From The TV ","" + timeCounterTV.getText().toString() );
+                defineAlert(item);
+//                successDialog.setTitleText("ההתראה נוצרה בהצלחה!");
+//                successDialog.setContentText("כאשר תורך יתקרב תקבל התראה למכשיר");
+//                successDialog.show();
+//                flagToReturn[0] =item;
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.setCancelable(true);
+        alert.show();
+    }
 
-            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                    .setTitleText("ההתראה נוצרה בהצלחה!")
-                    .setContentText("כאשר תורך יתקרב תקבל התראה למכשיר")
-                    .show();
-            editor.putBoolean("ALERT_ON",true).apply();
-            alertOn=true;
-            alertButton.setText("בטל התראה");
-            noticeServiceIntent = new Intent(this, NoticeService.class);
-            noticeServiceIntent.putExtra("branchId", branchId);
-            noticeServiceIntent.putExtra("userQueue", userQueue);
-            startService(noticeServiceIntent);
-            Log.d("ButtonPressed", "");
-            run = true;
-        }
-        else if (alertOn)
+    private void defineAlert(int item)
+    {
+        final Context context1=this;
+        final CharSequence[] itemsForTimeAlert = {
+                "30 דקות", "20 דקות", "10 דקות"
+        };
+        final CharSequence[] itemsForClientsAlert = {
+                "20 לקוחות ממתינים", "10 לקוחות ממתינים", "5 לקוחות ממתינים"
+        };
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        boolean timeIsOver=(timeCounterTV.getText().toString()).equals("00:00:00");
+        //&&(!timeIsOver)
+        if(item==0)
         {
-            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                    .setTitleText("ההתראה בוטלה!")
-                    .setContentText("כעת לא תקבל התראה למכשיר!")
-                    .show();
-            stopService(noticeServiceIntent);
-            editor.putBoolean("ALERT_ON",false).apply();
-            alertOn=false;
-            alertButton.setText("קבל התראה");
-            run=false;
+            editor.putInt("SERVICE_TYPE",GeneralConstans.SERVICE_TYPE_TIME).apply();
+            builder.setTitle("בחר כמה זמן לפני התור תרצה לקבל התראה :");
+            builder.setItems(itemsForTimeAlert, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    alertOn=true;
+                    Log.d("Time From The TV ","" + timeCounterTV.getText().toString() );
+                    Long millis=parseTimeFromTV(timeCounterTV.getText().toString());
+                    editor.putLong("AVERAGE_TIME", millis).apply();
+                    editor.putLong("REQUEST_CURRENT_TIME", System.currentTimeMillis()).apply();
+                    if(item==0)
+                    {
+                        Log.d("USER CHOICE ","30 MIN" );
+
+                        editor.putLong("USER_TIME_CHOICE", GeneralConstans.THIRTY_MIN_MILLIS).apply();
+
+                    }
+                    else if(item==1)
+                    {
+                        Log.d("USER CHOICE ","20 MIN" );
+
+                        editor.putLong("USER_TIME_CHOICE",GeneralConstans.TWENTY_MIN_MILLIS).apply();
+
+                    }
+                    else if(item==2)
+                    {
+                        Log.d("USER CHOICE ","10 MIN" );
+                        editor.putLong("USER_TIME_CHOICE", GeneralConstans.TEN_MIN_MILLIS).apply();
+
+                    }
+                        if(sharedPrefQueue.getLong("AVERAGE_TIME", 0)<sharedPrefQueue.getLong("USER_TIME_CHOICE",0))
+                        {
+                            SweetAlertDialog errorDialog= new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                            errorDialog.setTitleText("אין אפשרות ליצור התראה");
+                            errorDialog.setContentText("הזמן לקבלת התור הינו קצר מדי");
+                            errorDialog.show();
+                        }
+                        else {
+                            SweetAlertDialog successDialog= new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
+                            successDialog.setTitleText("ההתראה נוצרה בהצלחה");
+                            successDialog.setContentText("ההתראה תתקבל למכשירך לפי הזמן שבחרת");
+                            successDialog.show();
+                            editor.putBoolean("ALERT_ON",true).apply();
+                            alertButton.setText("בטל התראה");
+                            timeAlertServiceIntent = new Intent(context1, TimeAlertService.class);
+                            startService(timeAlertServiceIntent);
+                        }
+                }
+            });
+
+
+        }
+        else if(item==1)
+        {
+            editor.putInt("SERVICE_TYPE",GeneralConstans.SERVICE_TYPE_CLIENTS).apply();
+
+            builder.setTitle("בחר מספר לקוחות הממתינים לפניך  לקבלת התראה :");
+            builder.setItems(itemsForClientsAlert, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    if(item==0)
+                    {
+                        editor.putInt("USER_CLIENT_CHOICE",20).apply();
+                    }
+                    else if(item==1)
+                    {
+                        editor.putInt("USER_CLIENT_CHOICE",10).apply();
+
+                    }
+                    else if(item==2)
+                    {
+                        editor.putInt("USER_CLIENT_CHOICE",5).apply();
+
+                    }
+
+                    Log.d("Time From The TV ", "" + timeCounterTV.getText().toString());
+                    editor.putBoolean("ALERT_ON",true).apply();
+                    alertOn=true;
+                    alertButton.setText("בטל התראה");
+                    SweetAlertDialog successDialog= new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
+                    successDialog.setTitleText("ההתראה נוצרה בהצלחה");
+                    successDialog.setContentText("ההתראה תתקבל למכשירך כאשר תורך יתקרב");
+                    successDialog.show();
+                    clientAlertServiceIntent = new Intent(context1, ClientsAlertService.class);
+                    clientAlertServiceIntent.putExtra("branchId", branchId);
+                    clientAlertServiceIntent.putExtra("userQueue", userQueue);
+                    startService(clientAlertServiceIntent);
+                }
+            });
+
+        }
+        AlertDialog alert = builder.create();
+        alert.setCancelable(true);
+        alert.show();
+    }
+
+    private Long parseTimeFromTV(String time)
+    {
+
+        if(!(time.equals("00:00:00"))) {
+            Long millis, secondsRR;
+            int hours = Integer.parseInt(time.substring(0, 2));
+            int minutes = Integer.parseInt(time.substring(3, 5));
+            int seconds = Integer.parseInt(time.substring(6, 7));
+            secondsRR = TimeUnit.HOURS.toSeconds(hours) +
+                    TimeUnit.MINUTES.toSeconds(minutes) +
+                    seconds;
+            millis = TimeUnit.SECONDS.toMillis(secondsRR);
+            return millis;
+        }
+        return Long.valueOf(0);
+    }
+
+    public boolean isInteger(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
         }
     }
+
+
+
 
     public void setSharedPrefQueue(int lineNum)
     {
@@ -193,10 +435,28 @@ public class MainActivity4 extends Activity {
         Log.d("in async",lineNum+"");
     }
 
+    public void setAverage(int receivedHours, int receivedMinutes, int receivedSeconds,int waitingClients,int numOfClerks)
+    {
+        Long millis,secondsRR,hours,newHours,newMinutes,newSeconds;
+//        Log.d("receivedHours 4"," "+receivedHours);
+//        Log.d("receivedMinutes 4"," "+receivedMinutes);
+//        Log.d("receivedSeconds 4"," "+receivedSeconds);
+
+        secondsRR = TimeUnit.HOURS.toSeconds(receivedHours)+
+                TimeUnit.MINUTES.toSeconds(receivedMinutes)+
+                receivedSeconds;
+//        Log.d("(seconds*queueNum)/Cler", "(" + secondsRR+"*"+waitingClients+")/"+numOfClerks);
+
+        secondsRR = (secondsRR*waitingClients)/numOfClerks;
+        millis=TimeUnit.SECONDS.toMillis(secondsRR);
+        timer = new CounterClass(millis, 1000,this);
+        timer.start();
+    }
+
 //########################################################################################
 
 
-    public class DBDAL extends AsyncTask<String,Integer,Integer>
+    public class DBDAL extends AsyncTask<String,Object,Integer>
     {
         private int branchId;
         TextView userQueueDisplay,currentQueueDisplay_in_queue,totalQueueDisplay;
@@ -218,18 +478,17 @@ public class MainActivity4 extends Activity {
                 Statement st = con.createStatement();
                 Statement st2 = con.createStatement();
                 Statement st3 = con.createStatement();
-                String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
-                String query2 = "SELECT TotalQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
+                String query = "SELECT CurrentQueue,TotalQueue,AverageTime,NumberOfClerks FROM Queue WHERE BusinessId = '" + branchId + "'";
                 String query3 ="UPDATE Queue SET TotalQueue = TotalQueue + 1 WHERE BusinessId = '" + branchId + "'";
                 ResultSet rs = st.executeQuery(query);
-                ResultSet rs2 = st2.executeQuery(query2);
-                int rs3 = st3.executeUpdate(query3);
-                while (rs.next()&& rs2.next()) {
+                 st3.executeUpdate(query3);
+                while (rs.next()) {
                     int currentQueue = rs.getInt("CurrentQueue");
-                    int totalQueue= rs2.getInt("TotalQueue");
+                    int totalQueue= rs.getInt("TotalQueue");
+                    int numOfClerks = rs.getInt("NumberOfClerks");
+                    Time time=rs.getTime("AverageTime");
                     response = currentQueue;
-                    //System.out.println("\nSQLQ{1}"+sqlQ[1]+"\n");
-                    publishProgress(currentQueue,totalQueue);
+                    publishProgress(currentQueue,totalQueue,time,numOfClerks);
 
                 }
 
@@ -240,11 +499,24 @@ public class MainActivity4 extends Activity {
             return response;
         }
 
-        protected void onProgressUpdate(Integer... progress) {
-            setSharedPrefQueue(progress[0] + (progress[1] - progress[0]) + 1);
+        protected void onProgressUpdate(Object... progress) {
+            Time t = (Time) progress[2];
+//            Log.d("OPU t.hours"," "+t.getHours());
+//            Log.d("OPU t.Min"," "+t.getMinutes());
+//            Log.d("OPU t.hours"," "+t.getSeconds());
+//            Log.d("OPU Clerks"," "+progress[3]);
+            int numOfClerks=(Integer)progress[3];
+            int currQueue=(Integer) progress[0];
+            int totalQueue=(Integer) progress[1];
+            editor.putInt("TOTAL_QUEUE", totalQueue).apply();
+
+            int numOfPeopleForAverage=totalQueue-currQueue;// The Line Of The User Update The Total
+            if (numOfPeopleForAverage<1)
+                numOfPeopleForAverage=0;
+
+            setSharedPrefQueue(currQueue + (totalQueue - currQueue) + 1);
+            setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),numOfPeopleForAverage,numOfClerks);
             //currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
         }
     }
-
-
 }

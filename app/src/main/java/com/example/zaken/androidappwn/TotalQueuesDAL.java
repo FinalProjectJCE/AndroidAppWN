@@ -2,8 +2,10 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.sql.Connection;
@@ -20,6 +22,9 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
     private final Activity activity;
     private final Context context;
     private int branchId;
+    private SharedPreferences sharedPrefQueue;
+    private Button alertButton,cancelButton;
+
     TextView currentQueueDisplay_in_queue,totalQueueDisplay;
     String DB_URL = "jdbc:mysql://f37fa280-507d-4166-b70e-a427013f0c94.mysql.sequelizer.com:3306/dbf37fa280507d4166b70ea427013f0c94";
     String USER = "lewtprebbcrycgkb";
@@ -31,6 +36,10 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
         this.branchId=branchId;
         currentQueueDisplay_in_queue=(TextView) activity.findViewById(R.id.currentQueueDisplay_in_queue);
         totalQueueDisplay = (TextView) activity.findViewById(R.id.totalQueueDisplay);
+        sharedPrefQueue= context.getSharedPreferences("MyPrefsFile",context.MODE_PRIVATE);
+        alertButton=(Button)activity.findViewById(R.id.getNoticeButton);
+        cancelButton=(Button)activity.findViewById(R.id.cancelQueueButton);
+
     }
 
     @Override
@@ -69,8 +78,27 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
     }
 
     protected void onProgressUpdate(Integer... progress) {
-        int waitingClients = progress[1]-progress[0]-1; // Minus The User On The Waiting Clients
         currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
-        totalQueueDisplay.setText(Integer.toString(waitingClients));
+
+        int tq=sharedPrefQueue.getInt("TOTAL_QUEUE",-1);
+        int waitingClients;
+        if(tq!=(-1))
+        {
+            waitingClients=tq-progress[0]+1; // 1 Is Becozwe Updating The Total Queue Is Happed After The User Is Getting The Line
+            if(waitingClients>0)
+                totalQueueDisplay.setText(Integer.toString(waitingClients));
+            else if(waitingClients==0) {
+                totalQueueDisplay.setText("התור שלך הגיע");
+                alertButton.setClickable(false);
+                cancelButton.setText("יציאה");
+            }
+            else if(waitingClients<0) {
+                totalQueueDisplay.setText("התור שלך עבר");
+                alertButton.setClickable(false);
+                cancelButton.setText("יציאה");
+            }
+
+        }
+        //int waitingClients = progress[1]-progress[0]-1; // Minus The User On The Waiting Clients
     }
 }
