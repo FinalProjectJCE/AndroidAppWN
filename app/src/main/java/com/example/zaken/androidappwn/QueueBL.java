@@ -2,11 +2,14 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
 
 import java.sql.Time;
 import java.util.concurrent.TimeUnit;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * Created by Zaken on 02/04/2015.
@@ -17,7 +20,18 @@ public class QueueBL
     private TextView currentQueueDisplay;
     private TextView averageTextView;
     private TextView waitingClientsTV;
-    public void showQueue(Activity activity,Context context,int branchId)
+    private Context context;
+    private Activity activity;
+    private int branchId;
+
+    public QueueBL(Activity activity,Context context,int branchId)
+    {
+        this.context=context;
+        this.activity=activity;
+        this.branchId=branchId;
+
+    }
+    public void showQueue()
     {
         currentQueueDisplay = (TextView) activity.findViewById(R.id.currentQueueDisplayTV);
         averageTextView = (TextView) activity.findViewById(R.id.timeTextView);
@@ -44,21 +58,14 @@ public class QueueBL
 
         waitingClientsTV.setText(""+waitingClients);
         averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2],(Integer)progress[3]));
-
-
     }
 
     public String setAverage(int receivedHours, int receivedMinutes, int receivedSeconds,int queueNum,int numOfClerks) {
-        Long subtract,secondsRR,hours,newHours,newMinutes,newSeconds;
+        Long secondsRR,newHours,newMinutes,newSeconds;
         String toReturn;
-//        Log.d("receivedHours"," "+receivedHours);
-//        Log.d("receivedMinutes"," "+receivedMinutes);
-//        Log.d("receivedSeconds"," "+receivedSeconds);
-
         secondsRR = TimeUnit.HOURS.toSeconds(receivedHours)+
                 TimeUnit.MINUTES.toSeconds(receivedMinutes)+
                 receivedSeconds;
-//        Log.d("(seconds*queueNum)/Cler", "(" + secondsRR+"*"+queueNum+")/"+numOfClerks);
 
         secondsRR = (secondsRR*queueNum)/numOfClerks;
 
@@ -67,9 +74,7 @@ public class QueueBL
         newMinutes=TimeUnit.SECONDS.toMinutes(secondsRR);
         secondsRR=secondsRR-(newMinutes*60);
         newSeconds=secondsRR;
-//        System.out.println(""+receivedHours+":"+receivedMinutes+":"+receivedSeconds);
-//        System.out.println(""+queueNum);
-//        System.out.println(""+newHours+":"+newMinutes+":"+newSeconds);
+
         if(newHours<10)
             toReturn="0"+newHours;
         else
@@ -84,6 +89,35 @@ public class QueueBL
             toReturn+=":"+newSeconds;
 
         return toReturn;
+    }
+
+    public void connectionProblemAlert()
+    {
+
+        SweetAlertDialog warningDialog = new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE);
+        warningDialog.setTitleText("החיבור לאינטרנט כשל");
+        warningDialog.setContentText("כעת לא תוכל לצפות בנתוני התור!");
+        warningDialog.setConfirmText("נסה שנית");
+        warningDialog.showCancelButton(true);
+        warningDialog.setCancelText("בטל");
+        warningDialog.setCancelable(false);
+        warningDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sDialog) { // Try Again
+                task.cancel(true);
+                showQueue();
+                sDialog.dismissWithAnimation();
+            }
+        });
+        warningDialog.setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sDialog) {
+                sDialog.dismissWithAnimation();
+                Intent i = new Intent(context, Entry.class);
+                context.startActivity(i);
+            }
+        });
+        warningDialog.show();
     }
 
 

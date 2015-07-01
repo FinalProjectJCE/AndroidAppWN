@@ -70,8 +70,8 @@ public class MainActivity4 extends Activity {
         businessNameFromIntent = intent.getStringExtra("businessNameFromIntent");
         branchId = intent.getIntExtra("branchId",0);
         business_name_in_queue.setText(businessNameFromIntent);
-        tqb = new TotalQueuesBL();
-        tqb.showQueue(this, this, branchId);
+        tqb = new TotalQueuesBL(this,this,branchId);
+        tqb.showQueue();
         userQueue = sharedPrefQueue.getInt("THE_LINE",0);
         alertOn=sharedPrefQueue.getBoolean("ALERT_ON",false);
         totalQueueDisplay = (TextView)findViewById(R.id.totalQueueDisplay);
@@ -208,7 +208,8 @@ public class MainActivity4 extends Activity {
 
     public void onRestart(){
         super.onRestart();
-        tqb.showQueue(this, this, branchId);
+        tqb = new TotalQueuesBL(this,this,branchId);
+        tqb.showQueue();
     }
     @Override
     protected void onResume() {
@@ -223,19 +224,15 @@ public class MainActivity4 extends Activity {
 
     public void buttonListener(View view) { // Notice Button
         Log.d("Alert Button Pressed", "");
-
         boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
         if ( (userQueue !=0) && (!ao) ) {
-
             setChooseAlertDialog();
             Log.d("ButtonPressed", "");
             run = true; // Alert Button Is Pressed And No Service Is Running
         }
         else if (ao)
         {
-
             cancelAlert=new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
-
             cancelAlert.setTitleText("ביטול התראה");
             cancelAlert.setContentText("האם הנך בטוח שברצונך לבטל את ההתראה?");
             cancelAlert.setCancelText("השאר התראה");
@@ -247,7 +244,6 @@ public class MainActivity4 extends Activity {
                 public void onClick(SweetAlertDialog sDialog)
                 {
                     Context context = getApplicationContext();
-
                     alertTypeTV.setVisibility(View.INVISIBLE);
                     cancelAlert
                             .setTitleText("ההתראה בוטלה!")
@@ -411,7 +407,6 @@ public class MainActivity4 extends Activity {
                         Log.d("USER CHOICE ","20 MIN" );
 
                         editor.putLong("USER_TIME_CHOICE",GeneralConstans.TWENTY_MIN_MILLIS).apply();
-
                     }
                     else if(item==2)
                     {
@@ -482,11 +477,11 @@ public class MainActivity4 extends Activity {
                         alertButton.setText("בטל התראה");
                         //alertButton.setBackgroundColor(Color.parseColor("#dd6b55"));
                         alertButton.setBackground(getResources().getDrawable(R.drawable.red_buttons));
-
                         SweetAlertDialog successDialog = new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
                         successDialog.setTitleText("ההתראה נוצרה בהצלחה");
                         successDialog.setContentText("ההתראה תתקבל למכשירך כאשר תורך יתקרב");
                         successDialog.show();
+
                         clientAlertServiceIntent = new Intent(context1, ClientsAlertService.class);
                         clientAlertServiceIntent.putExtra("branchId", branchId);
                         clientAlertServiceIntent.putExtra("userQueue", userQueue);
@@ -614,14 +609,11 @@ public class MainActivity4 extends Activity {
         }
 
         protected void onProgressUpdate(Object... progress) {
-
             Time t = (Time) progress[2];
-
             int numOfClerks=(Integer)progress[3];
             int currQueue=(Integer) progress[0];
             int totalQueue=(Integer) progress[1];
             editor.putInt("TOTAL_QUEUE", totalQueue).apply();
-
             int numOfPeopleForAverage=totalQueue-currQueue;// The Line Of The User Update The Total
             if (numOfPeopleForAverage<1)
                 numOfPeopleForAverage=0;

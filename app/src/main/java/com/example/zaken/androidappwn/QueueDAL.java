@@ -22,12 +22,9 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
     private final Activity activity;
     private final Context context;
     private int branchId;
-    private TextView currentQueueDisplay;
-    private TextView averageTextView;
-    private TextView waitingClients;
     private String DB_URL,USER,PASS;
-    private SharedPreferences.Editor editor;
     private QueueBL qbl;
+    private Exception exceptionToBeThrown;
 
 
     public QueueDAL(QueueBL qbl,Activity activity,Context context,int branchId) {
@@ -35,13 +32,9 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
         this.activity = activity;
         this.context=context;
         this.branchId=branchId;
-        currentQueueDisplay = (TextView) activity.findViewById(R.id.currentQueueDisplayTV);
-        averageTextView = (TextView) activity.findViewById(R.id.timeTextView);
-        waitingClients = (TextView) activity.findViewById(R.id.waitingClientsDisplayTV);
         DB_URL = DatabaseConstants.DB_URL;
         PASS= DatabaseConstants.PASS;
         USER=DatabaseConstants.USER;
-
     }
 
     @Override
@@ -53,27 +46,15 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
             Connection con = DriverManager.getConnection(DB_URL, USER, PASS);
             String result = "\nDatabase connection success\n";
             Statement st = con.createStatement();
-            Statement st2 = con.createStatement();
-            Statement st3 = con.createStatement();
-            Statement st4 = con.createStatement();
 
             while(running) {
-                String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
-                String query2 = "SELECT AverageTime FROM Queue WHERE BusinessId = '" + branchId + "'";
-                String query3 = "SELECT TotalQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
-                String query4 = "SELECT NumberOfClerks FROM Queue WHERE BusinessId = '" + branchId + "'";
-
+                String query = "SELECT CurrentQueue,AverageTime,TotalQueue,NumberOfClerks FROM Queue WHERE BusinessId = '" + branchId + "'";
                 ResultSet rs = st.executeQuery(query);
-                ResultSet rs2 = st2.executeQuery(query2);
-                ResultSet rs3 = st3.executeQuery(query3);
-                ResultSet rs4 = st4.executeQuery(query4);
-
-                while (rs.next()&& rs2.next()&& rs3.next()&& rs4.next()) {
+                while (rs.next()) {
                     int currentQueue = rs.getInt("CurrentQueue");
-                    int totalQueue = rs3.getInt("TotalQueue");
-                    int numOfClerks = rs4.getInt("NumberOfClerks");
-                    //Log.d("Number Of Clerks Is "," "+numOfClerks);
-                    Time time=rs2.getTime("AverageTime");
+                    int totalQueue = rs.getInt("TotalQueue");
+                    int numOfClerks = rs.getInt("NumberOfClerks");
+                    Time time=rs.getTime("AverageTime");
                     int numOfPeopleForAverage = totalQueue-currentQueue;
                     response = currentQueue;
                     if (numOfPeopleForAverage<1)
@@ -86,36 +67,21 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
             }
             Log.d(result, "");
         } catch (Exception e) {
+            exceptionToBeThrown = e;
             e.printStackTrace();
         }
         return response;
     }
-
-    protected void onProgressUpdate(Object...progress) {
-//
-        qbl.setTextViews(progress);
-        Time t = (Time) progress[1];
-//        currentQueueDisplay.setText(progress[0].toString());
-//        averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2]));
-//        waitingClients.setText(progress[2].toString());
+    @Override
+    protected void onPostExecute(Integer integer) {
+        super.onPostExecute(integer);
+        if (exceptionToBeThrown != null) {
+            qbl.connectionProblemAlert();
+        }
     }
-
-    private String setAverage(int receivedHours, int receivedMinutes, int receivedSeconds,int queueNum) {
-        Long subtract,secondsRR,hours,newHours,newMinutes,newSeconds;
-
-        secondsRR = TimeUnit.HOURS.toSeconds(receivedHours)+
-                TimeUnit.MINUTES.toSeconds(receivedMinutes)+
-                receivedSeconds;
-        secondsRR = secondsRR*queueNum;
-        newHours=TimeUnit.SECONDS.toHours(secondsRR);
-        secondsRR=secondsRR-(newHours*3600);
-        newMinutes=TimeUnit.SECONDS.toMinutes(secondsRR);
-        secondsRR=secondsRR-(newMinutes*60);
-        newSeconds=secondsRR;
-//        System.out.println(""+receivedHours+":"+receivedMinutes+":"+receivedSeconds);
-//        System.out.println(""+queueNum);
-//        System.out.println(""+newHours+":"+newMinutes+":"+newSeconds);
-        return newHours+":"+newMinutes+":"+newSeconds;
+    protected void onProgressUpdate(Object...progress)
+    {
+        qbl.setTextViews(progress);
     }
 }
 

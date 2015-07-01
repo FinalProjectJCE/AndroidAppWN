@@ -15,14 +15,11 @@ import java.sql.Time;
  */
 public class LineAndTimeDAL extends AsyncTask<String,Object,Integer>
 {
-
         private int branchId;
         private LineAndTimeBL latbl;
         String DB_URL =DatabaseConstants.DB_URL;
         String USER = DatabaseConstants.USER;
         String PASS = DatabaseConstants.PASS;
-
-
 
         public LineAndTimeDAL(LineAndTimeBL latbl,int branchId) {
             this.branchId=branchId;

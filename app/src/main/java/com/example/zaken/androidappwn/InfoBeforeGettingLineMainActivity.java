@@ -57,8 +57,8 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         Log.d("distance",""+distanceFromDB);
         businessName.setText(businessNameFromIntent);
         setActivity(this);
-        qbl=new QueueBL();
-        qbl.showQueue(getActivity(),getContext(),branchId);
+        qbl=new QueueBL(this,this,branchId);
+        qbl.showQueue();
         thisLocationListener=this;
         }
     private Context getContext()
@@ -102,7 +102,8 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     }
     public void onRestart(){
         super.onRestart();
-        qbl.showQueue(getActivity(),getContext(),branchId);
+        qbl=new QueueBL(this,this,branchId);
+        qbl.showQueue();
     }
 
     public void testForInLine(View view)
