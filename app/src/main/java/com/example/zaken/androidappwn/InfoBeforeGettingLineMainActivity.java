@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.TextView;
 import android.app.Activity;
 import android.widget.Toast;
@@ -34,12 +35,15 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     private DB database = new DB(this);
     private int distanceFromDB;
     private String businessNameFromIntent;
+    private OpeningHoursBL openingHours;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.info_activity_before_getting_line);
+
+
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         businessName = (TextView) findViewById(R.id.businessNameTV);
         Intent intent = getIntent();
@@ -127,12 +131,6 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
         });
         pDialog.show();
 
-        //UPDATE Queue SET CurrentQueue = CurrentQueue + 1 WHERE BusinessId = '111'"
-//        Intent i=new Intent(this,MainActivity4.class);
-//        i.putExtra("businessNameFromIntent",businessName.getText());
-//        i.putExtra("branchId",  branchId);
-//        startActivity(i);
-
     }
 
 
@@ -140,8 +138,9 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     @Override
     public void onLocationChanged(Location location)
     {
+        lm.removeUpdates(this);
 
-            Log.d("ONLOCATION", "Hererer");
+        Log.d("ONLOCATION", "Hererer");
             float distance;
             Location businessLocation = new Location("");
             businessLocation.setLatitude(latitude);
@@ -149,32 +148,37 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
             distance = location.distanceTo(businessLocation);
             String notice = "The Distance Between Is \n" + distance;
             Toast.makeText(this, notice, Toast.LENGTH_LONG).show();
-            if (distance < distanceFromDB) {
+            if (distance < distanceFromDB || distanceFromDB==0 ) {
                 Intent i = new Intent(this, MainActivity4.class);
                 i.putExtra("businessNameFromIntent",businessNameFromIntent+" From GPS");
                 i.putExtra("branchId", branchId );
                 pDialog.cancel();
-                lm.removeUpdates(this);
+                //lm.removeUpdates(this);
                 startActivity(i);
             } else {
+                pDialog.cancel();
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("הנך עדיין רחוק/ה מבית העסק")
                         .setContentText("עלייך להיות קרוב/ה לבית העסק בלפחות 100 מטר")
-                        .setCancelText("בדוק שנית")
-                        .setConfirmText("בטל")
-                        .showCancelButton(true)
+                        //.setCancelText("בדוק שנית")
+                        .setConfirmText("אישור")
+                        .showCancelButton(false)
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sDialog) {
-                                sDialog.cancel();
-                                pDialog.cancel();
 
+                                sDialog.cancel();
                             }
                         })
                         .show();
             }
     }
 
+    public void openingHoursOnClick(View view)
+    {
+        openingHours=new OpeningHoursBL();
+        openingHours.getOpeningHoursBL(this,branchId);
+    }
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
 

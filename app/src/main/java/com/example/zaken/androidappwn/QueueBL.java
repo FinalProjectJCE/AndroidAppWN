@@ -16,12 +16,12 @@ public class QueueBL
     public QueueDAL task;
     private TextView currentQueueDisplay;
     private TextView averageTextView;
-    private TextView waitingClients;
+    private TextView waitingClientsTV;
     public void showQueue(Activity activity,Context context,int branchId)
     {
         currentQueueDisplay = (TextView) activity.findViewById(R.id.currentQueueDisplayTV);
         averageTextView = (TextView) activity.findViewById(R.id.timeTextView);
-        waitingClients = (TextView) activity.findViewById(R.id.waitingClientsDisplayTV);
+        waitingClientsTV = (TextView) activity.findViewById(R.id.waitingClientsDisplayTV);
         task= new QueueDAL(this,activity,context,branchId);
         task.execute();
     }
@@ -29,12 +29,20 @@ public class QueueBL
     public void setTextViews(Object...progress)
     {
         Time t = (Time) progress[1];
-        currentQueueDisplay.setText(progress[0].toString()+" From BL");
+        int totalClients=(int)progress[4];
+        int currentLine=(int)progress[0];
+        currentQueueDisplay.setText(progress[0].toString());
         int clients=(int)(progress[2]);
         if(clients!=0)
             clients+=1;
 
-        waitingClients.setText(""+clients);
+        int waitingClients;
+        if(totalClients==0 || totalClients<0)
+            waitingClients=0;
+        else
+            waitingClients= totalClients-currentLine+1;
+
+        waitingClientsTV.setText(""+waitingClients);
         averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2],(Integer)progress[3]));
 
 

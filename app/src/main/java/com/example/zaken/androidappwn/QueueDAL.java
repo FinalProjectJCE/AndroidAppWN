@@ -78,7 +78,7 @@ public class QueueDAL extends AsyncTask<String,Object,Integer>
                     response = currentQueue;
                     if (numOfPeopleForAverage<1)
                         numOfPeopleForAverage=0;
-                    publishProgress(currentQueue,time,numOfPeopleForAverage,numOfClerks);
+                    publishProgress(currentQueue,time,numOfPeopleForAverage,numOfClerks,totalQueue);
 
                 }
                 if(isCancelled())

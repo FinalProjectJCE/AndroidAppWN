@@ -6,12 +6,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +32,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class MainActivity4 extends Activity {
 
     TextView business_name_in_queue, current_line_in_queue, totalQueueDisplay, currentQueueDisplay_in_queue, userQueueDisplay;
+    private TextView alertTypeTV;
     Activity activity;
     Context context;
     TotalQueuesBL tqb;
@@ -44,11 +48,18 @@ public class MainActivity4 extends Activity {
     private boolean alertOn;
     private TextView timeCounterTV;
     private SweetAlertDialog chooseAlertType;
+    private SweetAlertDialog cancelQueueAlert;
+    private SweetAlertDialog cancelAlert;
     private CounterClass timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_main_activity4);
         sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         business_name_in_queue = (TextView) findViewById(R.id.business_name_in_queue);
@@ -63,6 +74,8 @@ public class MainActivity4 extends Activity {
         tqb.showQueue(this, this, branchId);
         userQueue = sharedPrefQueue.getInt("THE_LINE",0);
         alertOn=sharedPrefQueue.getBoolean("ALERT_ON",false);
+        totalQueueDisplay = (TextView)findViewById(R.id.totalQueueDisplay);
+        alertTypeTV=(TextView)findViewById(R.id.alertTypeTV);
 
         if (userQueue ==0) {
             Log.d("Initial Of The Shared ", "" + userQueue);
@@ -89,9 +102,29 @@ public class MainActivity4 extends Activity {
                 if(ao) {
                     Log.d("get(ALERT_ON,true)", "בטל תור");
                     alertButton.setText("בטל התראה");
+                    //alertButton.setBackgroundColor(Color.parseColor("#dd6b55"));
+                    alertButton.setBackground(getResources().getDrawable(R.drawable.red_buttons));
+
+                    setAlertTV();
                 }
             }
         editor = sharedPrefQueue.edit();
+    }
+
+    private void setAlertTV()
+    {
+        int serviceType =sharedPrefQueue.getInt("SERVICE_TYPE",0);
+        String toDisplay="התראה לפי ";
+        if (serviceType==GeneralConstans.SERVICE_TYPE_TIME)
+        {
+            toDisplay+="זמן ממוצע מופעלת!";
+        }
+        else if(serviceType==GeneralConstans.SERVICE_TYPE_CLIENTS)
+        {
+            toDisplay+="מספר לקוחות מופעלת!";
+        }
+        alertTypeTV.setText(toDisplay);
+        alertTypeTV.setVisibility(View.VISIBLE);
     }
 
     private void setNewCountDown() // Set New Countdown When The App Is Re Open After Destroyed
@@ -106,7 +139,7 @@ public class MainActivity4 extends Activity {
 
         if(remainingTime<0)
         {
-            timeCounterTV.setText("הזמן תם");
+            timeCounterTV.setText("00:00:00");
         }
         else {
             Log.d("Set New Timer","");
@@ -200,65 +233,120 @@ public class MainActivity4 extends Activity {
         }
         else if (ao)
         {
-            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                    .setTitleText("ההתראה בוטלה!")
-                    .setContentText("כעת לא תקבל התראה למכשיר!")
-                    .show();
-            int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
-            if(serviceType == 0) {
-                Log.d("Stop Time Service Noti","");
-                timeAlertServiceIntent = new Intent(this, TimeAlertService.class);
-                stopService(timeAlertServiceIntent);
+
+            cancelAlert=new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+
+            cancelAlert.setTitleText("ביטול התראה");
+            cancelAlert.setContentText("האם הנך בטוח שברצונך לבטל את ההתראה?");
+            cancelAlert.setCancelText("השאר התראה");
+            cancelAlert.setConfirmText("בטל התראה");
+            cancelAlert.setCancelable(false);
+            cancelAlert.showCancelButton(true);
+            cancelAlert.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                @Override
+                public void onClick(SweetAlertDialog sDialog)
+                {
+                    Context context = getApplicationContext();
+
+                    alertTypeTV.setVisibility(View.INVISIBLE);
+                    cancelAlert
+                            .setTitleText("ההתראה בוטלה!")
+                            .setContentText("כעת לא תקבל התראה למכשיר!")
+                            .setConfirmText("אישור")
+                            .showCancelButton(false)
+                            .setConfirmClickListener(null)
+                            .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                    int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
+                    if(serviceType == 0) {
+                        Log.d("Stop Time Service Noti","");
+                        timeAlertServiceIntent = new Intent(context, TimeAlertService.class);
+                        stopService(timeAlertServiceIntent);
+                    }
+                    else if(serviceType == 1) {
+                        clientAlertServiceIntent = new Intent(context, ClientsAlertService.class);
+
+                        stopService(clientAlertServiceIntent);
+                        Log.d("Stop Clien Service Noti","");
+                    }
+                    editor.putBoolean("ALERT_ON",false).apply();
+                    alertOn=false;
+                    alertButton.setText("קבל התראה");
+                    alertButton.setBackgroundColor(Color.parseColor("#05b0ff"));
+                    alertButton.setBackground(getResources().getDrawable(R.drawable.blue_buttons));
 
 
-            }
-            else if(serviceType == 1) {
-                clientAlertServiceIntent = new Intent(this, ClientsAlertService.class);
+                    run=false; // Alert Button Is Pressed And Service Is On
+                }
+                });
+            cancelAlert.setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                @Override
+                public void onClick(SweetAlertDialog sDialog) {
 
-                stopService(clientAlertServiceIntent);
-                Log.d("Stop Clien Service Noti","");
-            }
-            editor.putBoolean("ALERT_ON",false).apply();
-            alertOn=false;
-            alertButton.setText("קבל התראה");
-            run=false; // Alert Button Is Pressed And Service Is On
-
+                    cancelAlert.cancel();
+                }
+            }) ;
+            cancelAlert.show();
         }
     }
     public void cancelQueueButtonClick(View view) {//getLineAsync.cancel(true);
-        boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
-        if(timer!=(null))
-        timer.cancel();
+        cancelQueueAlert=new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
 
-        if(ao)
-        {
-            int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
-             if(serviceType == 0) {
-                 Log.d("Stop Time Service Cance","");
-                 timeAlertServiceIntent = new Intent(this, TimeAlertService.class);
-                 stopService(timeAlertServiceIntent);
+        cancelQueueAlert.setTitleText("יציאה מהתור");
+        cancelQueueAlert.setContentText("האם אתה בטוח שברצונך לצאת מהתור");
+        cancelQueueAlert.setCancelText("להישאר בתור");
+        cancelQueueAlert.setConfirmText("לצאת מהתור");
+        cancelQueueAlert.setCancelable(false);
+        cancelQueueAlert.showCancelButton(true);
+        cancelQueueAlert.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog)
+                    {
+                        Context context = getApplicationContext();
 
-             }
-            else if(serviceType == 1) {
-                 clientAlertServiceIntent = new Intent(this, ClientsAlertService.class);
-                 stopService(clientAlertServiceIntent);
-                 Log.d("Stop Time Service Cance","");
-             }
-        }
-        editor.putBoolean("ALERT_ON",false).apply();
-        editor.putInt("THE_LINE",0).apply();
-        editor.putLong("AVERAGE_TIME",0).apply();
+                        boolean ao=sharedPrefQueue.getBoolean("ALERT_ON",false);
+                        if(timer!=(null))
+                            timer.cancel();
 
-        Context context = getApplicationContext();
-        CharSequence text = "התור שלך בוטל";
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-        Intent i=new Intent(this,Entry.class);
-        startActivity(i);
-        if(asyncIsRunning)
-            getLineAsync.cancel(true);
-        finish();
+                        if(ao)
+                        {
+                            int serviceType=sharedPrefQueue.getInt("SERVICE_TYPE",0);
+                            if(serviceType == 0) {
+                                Log.d("Stop Time Service Cance","");
+                                timeAlertServiceIntent = new Intent(context, TimeAlertService.class);
+                                stopService(timeAlertServiceIntent);
+                            }
+                            else if(serviceType == 1) {
+                                clientAlertServiceIntent = new Intent(context, ClientsAlertService.class);
+                                stopService(clientAlertServiceIntent);
+                                Log.d("Stop Time Service Cance","");
+                            }
+                        }
+                        editor.putBoolean("ALERT_ON",false).apply();
+                        editor.putInt("THE_LINE",0).apply();
+                        editor.putLong("AVERAGE_TIME",0).apply();
+
+                        CharSequence text = "התור שלך בוטל";
+                        int duration = Toast.LENGTH_SHORT;
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.show();
+                        Intent i=new Intent(context,Entry.class);
+                        startActivity(i);
+                        if(asyncIsRunning)
+                            getLineAsync.cancel(true);
+                        finish();
+
+                    }
+                });
+        cancelQueueAlert.setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sDialog) {
+
+                cancelQueueAlert.cancel();
+            }
+        }) ;
+        cancelQueueAlert.show();
+
+
     }
 
     private void setChooseAlertDialog()
@@ -345,8 +433,13 @@ public class MainActivity4 extends Activity {
                             successDialog.show();
                             editor.putBoolean("ALERT_ON",true).apply();
                             alertButton.setText("בטל התראה");
+                            //alertButton.setBackgroundColor(Color.parseColor("#dd6b55"));
+                            alertButton.setBackground(getResources().getDrawable(R.drawable.red_buttons));
+
+
                             timeAlertServiceIntent = new Intent(context1, TimeAlertService.class);
                             startService(timeAlertServiceIntent);
+                            setAlertTV();
                         }
                 }
             });
@@ -356,7 +449,7 @@ public class MainActivity4 extends Activity {
         else if(item==1)
         {
             editor.putInt("SERVICE_TYPE",GeneralConstans.SERVICE_TYPE_CLIENTS).apply();
-
+            final int currentLineFromParse = parseTotalFromTV(totalQueueDisplay.getText().toString());
             builder.setTitle("בחר מספר לקוחות הממתינים לפניך  לקבלת התראה :");
             builder.setItems(itemsForClientsAlert, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int item) {
@@ -374,19 +467,32 @@ public class MainActivity4 extends Activity {
                         editor.putInt("USER_CLIENT_CHOICE",5).apply();
 
                     }
+                    int userClientChoice = sharedPrefQueue.getInt("USER_CLIENT_CHOICE",0);
+                    if(currentLineFromParse<userClientChoice)
+                    {
+                        SweetAlertDialog errorDialog= new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                        errorDialog.setTitleText("אין אפשרות ליצור התראה");
+                        errorDialog.setContentText("מספר הלקוחות הממתינים נמוך ממה שבחרת!");
+                        errorDialog.show();
+                    }
+                    else {
+                        Log.d("Time From The TV ", "" + timeCounterTV.getText().toString());
+                        editor.putBoolean("ALERT_ON", true).apply();
+                        alertOn = true;
+                        alertButton.setText("בטל התראה");
+                        //alertButton.setBackgroundColor(Color.parseColor("#dd6b55"));
+                        alertButton.setBackground(getResources().getDrawable(R.drawable.red_buttons));
 
-                    Log.d("Time From The TV ", "" + timeCounterTV.getText().toString());
-                    editor.putBoolean("ALERT_ON",true).apply();
-                    alertOn=true;
-                    alertButton.setText("בטל התראה");
-                    SweetAlertDialog successDialog= new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
-                    successDialog.setTitleText("ההתראה נוצרה בהצלחה");
-                    successDialog.setContentText("ההתראה תתקבל למכשירך כאשר תורך יתקרב");
-                    successDialog.show();
-                    clientAlertServiceIntent = new Intent(context1, ClientsAlertService.class);
-                    clientAlertServiceIntent.putExtra("branchId", branchId);
-                    clientAlertServiceIntent.putExtra("userQueue", userQueue);
-                    startService(clientAlertServiceIntent);
+                        SweetAlertDialog successDialog = new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
+                        successDialog.setTitleText("ההתראה נוצרה בהצלחה");
+                        successDialog.setContentText("ההתראה תתקבל למכשירך כאשר תורך יתקרב");
+                        successDialog.show();
+                        clientAlertServiceIntent = new Intent(context1, ClientsAlertService.class);
+                        clientAlertServiceIntent.putExtra("branchId", branchId);
+                        clientAlertServiceIntent.putExtra("userQueue", userQueue);
+                        startService(clientAlertServiceIntent);
+                        setAlertTV();
+                    }
                 }
             });
 
@@ -394,6 +500,14 @@ public class MainActivity4 extends Activity {
         AlertDialog alert = builder.create();
         alert.setCancelable(true);
         alert.show();
+    }
+
+    private int parseTotalFromTV(String total) {
+        if( isInteger(total))
+        {
+            return Integer.parseInt(total);
+        }
+        else return 0;
     }
 
     private Long parseTimeFromTV(String time)
@@ -500,11 +614,9 @@ public class MainActivity4 extends Activity {
         }
 
         protected void onProgressUpdate(Object... progress) {
+
             Time t = (Time) progress[2];
-//            Log.d("OPU t.hours"," "+t.getHours());
-//            Log.d("OPU t.Min"," "+t.getMinutes());
-//            Log.d("OPU t.hours"," "+t.getSeconds());
-//            Log.d("OPU Clerks"," "+progress[3]);
+
             int numOfClerks=(Integer)progress[3];
             int currQueue=(Integer) progress[0];
             int totalQueue=(Integer) progress[1];
@@ -516,7 +628,6 @@ public class MainActivity4 extends Activity {
 
             setSharedPrefQueue(currQueue + (totalQueue - currQueue) + 1);
             setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),numOfPeopleForAverage,numOfClerks);
-            //currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
         }
     }
 }

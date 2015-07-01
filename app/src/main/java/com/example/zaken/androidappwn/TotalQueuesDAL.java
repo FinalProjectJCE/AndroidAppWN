@@ -3,8 +3,12 @@ package com.example.zaken.androidappwn;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -25,7 +29,7 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
     private SharedPreferences sharedPrefQueue;
     private Button alertButton,cancelButton;
 
-    TextView currentQueueDisplay_in_queue,totalQueueDisplay;
+    TextView currentQueueDisplay_in_queue,totalQueueDisplay,totalQueueText;
     String DB_URL = "jdbc:mysql://f37fa280-507d-4166-b70e-a427013f0c94.mysql.sequelizer.com:3306/dbf37fa280507d4166b70ea427013f0c94";
     String USER = "lewtprebbcrycgkb";
     String PASS = "S5zS2ExvQqZQrUK8dwSJvpv5dSvED4RwmijLrG55TEesXBTrAR3QDXPCGDPijZZU";
@@ -35,6 +39,7 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
         this.context=context;
         this.branchId=branchId;
         currentQueueDisplay_in_queue=(TextView) activity.findViewById(R.id.currentQueueDisplay_in_queue);
+        totalQueueText=(TextView) activity.findViewById(R.id.totalQueueText);
         totalQueueDisplay = (TextView) activity.findViewById(R.id.totalQueueDisplay);
         sharedPrefQueue= context.getSharedPreferences("MyPrefsFile",context.MODE_PRIVATE);
         alertButton=(Button)activity.findViewById(R.id.getNoticeButton);
@@ -88,17 +93,39 @@ public class TotalQueuesDAL extends AsyncTask<String,Integer,Integer>
             if(waitingClients>0)
                 totalQueueDisplay.setText(Integer.toString(waitingClients));
             else if(waitingClients==0) {
-                totalQueueDisplay.setText("התור שלך הגיע");
-                alertButton.setClickable(false);
-                cancelButton.setText("יציאה");
+                setQueueArrivedTV();
+
             }
             else if(waitingClients<0) {
-                totalQueueDisplay.setText("התור שלך עבר");
-                alertButton.setClickable(false);
-                cancelButton.setText("יציאה");
+                setPassedQueue();
+
             }
 
         }
         //int waitingClients = progress[1]-progress[0]-1; // Minus The User On The Waiting Clients
+    }
+
+    private void setPassedQueue()
+    {
+        totalQueueDisplay.setVisibility(View.INVISIBLE);
+
+        totalQueueText.setText("התור שלך עבר");
+        totalQueueText.setTextColor(Color.parseColor("#000099"));
+        totalQueueText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40);
+        totalQueueText.setGravity(Gravity.CENTER);
+        alertButton.setClickable(false);
+        cancelButton.setText("יציאה");
+    }
+
+    private void setQueueArrivedTV()
+    {
+        totalQueueDisplay.setVisibility(View.INVISIBLE);
+
+        totalQueueText.setText("התור שלך הגיע");
+        totalQueueText.setTextColor(Color.parseColor("#000099"));
+        totalQueueText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40);
+        totalQueueText.setGravity(Gravity.CENTER);
+        alertButton.setClickable(false);
+        cancelButton.setText("יציאה");
     }
 }

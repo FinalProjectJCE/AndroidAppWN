@@ -89,7 +89,7 @@ public class Entry extends Activity {
                      Intent i=new Intent(this,MainActivity4.class);
                      businessNameFromDB=database.getBusinessName(branchIdFromScan);
                      i.putExtra("branchId",  branchIdFromScan);
-                     i.putExtra("businessNameFromIntent",businessNameFromDB+" From QR");
+                     i.putExtra("businessNameFromIntent",businessNameFromDB);
                      startActivity(i);
                 }
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();

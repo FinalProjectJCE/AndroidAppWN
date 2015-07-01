@@ -22,11 +22,14 @@
             android:id="@+id/chooseBusinessButton"
             android:onClick="choose_business"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-            android:textSize="40dp"
+            android:textSize="70dp"
             android:textStyle="bold|italic"
-            android:background="@android:color/holo_blue_light"
+            android:background="@drawable/blue_buttons"
             android:textColor="@android:color/white"
-            />
+
+            android:singleLine="false" />
+
+
     </LinearLayout>
 
     <LinearLayout
@@ -45,7 +48,7 @@
             android:textSize="35sp"
             android:textStyle="bold|italic"
             android:background="@drawable/qrr"
-            android:textColor="@android:color/background_dark"
+            android:textColor="@android:color/holo_blue_dark"
             android:layout_marginTop="5dp"
             android:onClick="scan" />
     </LinearLayout>

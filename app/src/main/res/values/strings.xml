@@ -23,6 +23,7 @@
     <string name="businessNameText">שם העסק</string>
     <string name="getLineButtonText">קבל תור</string>
     <string name="title_activity_alarm_main">AlarmMainActivity</string>
+    <string name="businessOpening">שעות פתיחה</string>
 
 
 </resources>
