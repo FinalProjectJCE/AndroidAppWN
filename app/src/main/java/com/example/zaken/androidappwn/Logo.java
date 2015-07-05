@@ -1,5 +1,9 @@
 package com.example.zaken.androidappwn;
-
+/**
+ * This Is The Main Class For The Logo Page.
+ * It Displays The Logo Off The Application For 3 Seconds.
+ * The Insertion To The Database Starts Here.
+ */
 import android.app.Activity;
 
 import android.content.Intent;
@@ -13,22 +17,22 @@ public class Logo extends Activity {
 
     Handler mHandler;
     Runnable mNextActivityCallback;
-    AsyncBL abl;
+    InsertToLocalDBBL abl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logo);
-        abl=new AsyncBL();
+        abl=new InsertToLocalDBBL();
         abl.getCities(this,this);
         mHandler = new Handler();
         mNextActivityCallback = new Runnable() {
             @Override
             public void run() {
-                // Intent to jump to the next activity
+
                 Intent i= new Intent(Logo.this,Entry.class);
                 startActivity(i);
-                finish(); // so the splash activity goes away
+                finish();
             }
         };
         mHandler.postDelayed(mNextActivityCallback, 3000L);

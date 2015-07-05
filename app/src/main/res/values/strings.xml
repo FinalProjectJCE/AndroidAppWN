@@ -17,13 +17,14 @@
     <string name="textOnChooseBusinessButton">בחר בית עסק</string>
     <string name="textOnScanQRButton">סרוק ברקוד ממסך השירות</string>
     <string name="loadingQueue">טוען...</string>
-    <string name="currentQueueText"> מספר התור הנוכחי הוא  : </string>
+    <string name="currentQueueText">מספר התור הבא : </string>
     <string name="waitingClientsText"> מספר האנשים בתור : </string>
     <string name="estimatedTimeText">במידה ותקח תור עכשיו, הזמן המשוער לקבלת התור יהיה : </string>
     <string name="businessNameText">שם העסק</string>
     <string name="getLineButtonText">קבל תור</string>
     <string name="title_activity_alarm_main">AlarmMainActivity</string>
     <string name="businessOpening">שעות פתיחה</string>
+    <string name="nextInLineTV">מספר התור הבא : </string>
 
 
 </resources>

@@ -11,18 +11,22 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.content.Intent;
 import java.util.ArrayList;
-
-
+/**
+ * This Is The Main Class For The "Choose Business" Page.
+ * In This Page, The User Needs To Choose The Business That He Want To See Info About,.
+ * First He Needs To Choose The City, Than The Business And Than The Branch.
+ */
 public class ChooseBusinessMainActivity extends Activity {
 
-    private Spinner cityTypeSpinner;
-    private Spinner businessTypeSpinner;
-    private Spinner branchTypeSpinner;
+    private Spinner cityTypeSpinner,businessTypeSpinner,branchTypeSpinner;
     private int branchId;
     private ArrayList<String> cities,business,branch;
-    private DB database = new DB(this);
+    private BusinessesBL database = new BusinessesBL(this);
     private String chosenCity,chosenBusiness,chosenBranch;
 
+    /**
+     * On The Creation Of The Page, The Spinners Are Being Filled.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +56,8 @@ public class ChooseBusinessMainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    // This Method Adds Item To The City Spinner From The Database.
     public void addItemsToCityTypeSpinner()
     {
         cities= database.getCities();
@@ -60,6 +66,11 @@ public class ChooseBusinessMainActivity extends Activity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_items, cities);
         cityTypeSpinner.setAdapter(adapter);
     }
+
+    /**
+     * This Method Is The Listener To The City Spinner.
+     * It Passes The User`s City Choice To Fill The Business Spinner.
+     */
     public void addListenerToCityTypeSpinner()
     {
         cityTypeSpinner = (Spinner) findViewById(R.id.city_type_spinner);
@@ -68,9 +79,7 @@ public class ChooseBusinessMainActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long l)
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
-                System.out.println("The Item Is : "+itemSelectedInSpinner );
                 chosenCity = itemSelectedInSpinner.toString();
-                Log.d("Item Selcted Is ", chosenCity);
                 business = database.getBusinessByCity(chosenCity);
                 addItemsToBusinessTypeSpinner();
                 addListenerToBusinessTypeSpinner();
@@ -83,6 +92,7 @@ public class ChooseBusinessMainActivity extends Activity {
         });
     }
 
+    // This Method Adds Item To The Business Spinner From The Database.
     public void addItemsToBusinessTypeSpinner()
     {
         if(business != null)
@@ -93,6 +103,11 @@ public class ChooseBusinessMainActivity extends Activity {
         }
     }
 
+    /**
+     * This Method Is The Listener To The Business Spinner.
+     * After The User Choose A City And . The Business Spinner Is Being Filled Accord To The City.
+     * It Passes The User`s Business Choice To Fill The Branch Spinner.
+     */
     public void addListenerToBusinessTypeSpinner()
     {
         businessTypeSpinner = (Spinner) findViewById(R.id.business_type_spinner);
@@ -114,6 +129,7 @@ public class ChooseBusinessMainActivity extends Activity {
         });
     }
 
+    // This Method Adds Item To The Branch Spinner From The Database.
     public void addItemsToBranchTypeSpinner()
     {
         branchTypeSpinner = (Spinner)findViewById(R.id.branch_type_spinner);
@@ -121,6 +137,10 @@ public class ChooseBusinessMainActivity extends Activity {
         branchTypeSpinner.setAdapter(adapter);
     }
 
+    /**
+     * This Method Is The Listener To The Branch Spinner.
+     * After The User Choose A City And A Business, The Branch Spinner Is Being Filled Accord To The City.
+     */
     public void addListenerToBranchTypeSpinner()
     {
         branchTypeSpinner = (Spinner) findViewById(R.id.branch_type_spinner);
@@ -130,9 +150,6 @@ public class ChooseBusinessMainActivity extends Activity {
             {
                 String itemSelectedInSpinner = parent.getItemAtPosition(position).toString();
                 chosenBranch =itemSelectedInSpinner.toString();
-                Log.e("The Branch Is",""+chosenBranch);
-
-
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
@@ -140,6 +157,10 @@ public class ChooseBusinessMainActivity extends Activity {
         });
     }
 
+    /**
+     * This Method Is Invoked When The User Press The Send Button.
+     * It Redirect The User To The Business Info Page.
+     */
     public void send_business(View view){
         Intent i=new Intent(this,InfoBeforeGettingLineMainActivity.class);
         i.putExtra("name",businessTypeSpinner.getSelectedItem().toString()+" "+
@@ -147,7 +168,6 @@ public class ChooseBusinessMainActivity extends Activity {
                 cityTypeSpinner.getSelectedItem().toString());
         int businessId = database.getBusinessId(chosenCity,chosenBusiness, chosenBranch);
         branchId=businessId;
-        Log.e("The Business Id Is+",""+branchId);
         i.putExtra("branchId",  branchId);
         Log.d(cityTypeSpinner.getSelectedItem().toString(), "");
         startActivity(i);

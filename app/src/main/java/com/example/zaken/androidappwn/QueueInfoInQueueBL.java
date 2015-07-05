@@ -2,7 +2,6 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.Log;
@@ -16,11 +15,13 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * Created by Zaken on 02/04/2015.
+ * This Class Is The Business Logic Layer For
+ * The Queue Data While The User Is In Queue.
  */
-public class TotalQueuesBL
+public class QueueInfoInQueueBL
 {
     private SharedPreferences sharedPrefQueue;
-    TotalQueuesDAL task;
+    QueueInfoInQueueDAL task;
     private Button alertButton,cancelButton;
     private TextView currentQueueDisplay_in_queue,totalQueueDisplay,totalQueueText;
     private Context context;
@@ -28,8 +29,10 @@ public class TotalQueuesBL
     private int branchId;
 
 
-
-    public TotalQueuesBL(Activity activity,Context context,int branchId)
+    /**
+     * Sets The Text Views In The Final Page.
+     */
+    public QueueInfoInQueueBL(Activity activity, Context context, int branchId)
     {
         currentQueueDisplay_in_queue=(TextView) activity.findViewById(R.id.currentQueueDisplay_in_queue);
         totalQueueText=(TextView) activity.findViewById(R.id.totalQueueText);
@@ -42,19 +45,24 @@ public class TotalQueuesBL
         this.branchId=branchId;
     }
 
+    // Starts The Task.
     public void showQueue()
     {
-        task= new TotalQueuesDAL(this,activity,context,branchId);
+        task= new QueueInfoInQueueDAL(this,activity,context,branchId);
         task.execute();
     }
+
+    /**
+     * Sets The Data in The Text Views.
+     */
     public void setTextViews(Integer...progress)
     {
         currentQueueDisplay_in_queue.setText(Integer.toString(progress[0]));
-        int tq=sharedPrefQueue.getInt("TOTAL_QUEUE",-1);
+        int totalClientsInQueue=sharedPrefQueue.getInt("TOTAL_QUEUE",-1);
         int waitingClients;
-        if(tq!=(-1))
+        if(totalClientsInQueue!=(-1))
         {
-            waitingClients=tq-progress[0]+1; // 1 Is Becozwe Updating The Total Queue Is Happed After The User Is Getting The Line
+            waitingClients=totalClientsInQueue-progress[0]+1; // 1 Is Becouse Updating The Total Queue Is Happend After The User Is Getting The Line
             if(waitingClients>0)
                 totalQueueDisplay.setText(Integer.toString(waitingClients));
             else if(waitingClients==0) {
@@ -64,8 +72,11 @@ public class TotalQueuesBL
                 setPassedQueue();
             }
         }
-
     }
+
+    /**
+     * If The User Queue Is Passed Show Him A Message.
+     */
     private void setPassedQueue()
     {
         totalQueueDisplay.setVisibility(View.INVISIBLE);
@@ -77,6 +88,9 @@ public class TotalQueuesBL
         cancelButton.setText("יציאה");
     }
 
+    /**
+     * When The User Queue Is Arrived, It Will Disapear On The Page.
+     */
     private void setQueueArrivedTV()
     {
         totalQueueDisplay.setVisibility(View.INVISIBLE);
@@ -88,9 +102,11 @@ public class TotalQueuesBL
         cancelButton.setText("יציאה");
     }
 
+    /**
+     * If There Is A Connection Problem, This Method Show A Dialog To The User.
+     */
     public void connectionProblemAlert()
     {
-
         SweetAlertDialog warningDialog = new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE);
         warningDialog.setTitleText("החיבור לאינטרנט כשל");
         warningDialog.setContentText("תורך נשמר אך כעת לא תוכל לצפות בנתוני התור!");
@@ -100,16 +116,15 @@ public class TotalQueuesBL
         warningDialog.setCancelable(false);
         warningDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
-            public void onClick(SweetAlertDialog sDialog) { // Try Again
+            public void onClick(SweetAlertDialog sDialog) { // Try Again.
                 task.cancel(true);
                 showQueue();
-                Log.d("TRY AGAIN CLICKED", "TRY AGAIN CLICKED");
                 sDialog.dismissWithAnimation();
             }
         });
         warningDialog.setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
-            public void onClick(SweetAlertDialog sDialog) {
+            public void onClick(SweetAlertDialog sDialog) { // Cancel.
                 sDialog.dismissWithAnimation();
             }
         });

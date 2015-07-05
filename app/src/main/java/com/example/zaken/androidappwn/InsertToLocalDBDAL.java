@@ -2,11 +2,11 @@ package com.example.zaken.androidappwn;
 
 /**
  * Created by Zaken on 22/03/2015.
+ * * This Class Is The Data Access Layer To The Insertion Of The Data Into Database.
  */
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,13 +15,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 
-public class Async extends AsyncTask<String,ArrayList,ArrayList> {
+public class InsertToLocalDBDAL extends AsyncTask<String,ArrayList,ArrayList> {
     private final Activity activity;
     private final Context context;
     private String query;
     private String idForDB,cityForDB,businessForDB,branchForDB,DB_URL,USER,PASS ,latitudeForDB,longitudeForDB,distanceForDB ;
 
-    public Async(Activity activity,Context context){
+    public InsertToLocalDBDAL(Activity activity, Context context){
         this.activity=activity;
         this.context=context;
 
@@ -38,6 +38,7 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
         distanceForDB = DatabaseConstants.DISTANCE;
     }
 
+    // doInBackground Starts The Connection To The DB And Sends The Data In The Process
     protected ArrayList doInBackground(String... sqlQ) {
         ArrayList<String> valuesList;
         valuesList = null;
@@ -48,7 +49,7 @@ public class Async extends AsyncTask<String,ArrayList,ArrayList> {
             ResultSet rs = st.executeQuery(query);
             valuesList = new ArrayList<String>();
 
-            DB data  = new DB(context);
+            BusinessesBL data  = new BusinessesBL(context);
                 while (rs.next())
                 {
                     data.insertToDB(rs.getString(cityForDB), rs.getString(businessForDB), rs.getInt(idForDB), rs.getString(branchForDB),rs.getDouble(latitudeForDB),rs.getDouble(longitudeForDB),rs.getInt(distanceForDB));

@@ -2,20 +2,17 @@ package com.example.zaken.androidappwn;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 /**
  * Created by Zaken on 30/03/2015.
+ * This Is The Business Logic Layer For The Insertion The Data To The Database.
  */
-public class AsyncBL
+public class InsertToLocalDBBL
 {
-    Async task;
+    InsertToLocalDBDAL task;
     public void getCities(Activity activity,Context context)
     {
-        task = new Async(activity,context);
+        task = new InsertToLocalDBDAL(activity,context);
         task.execute();
     }
 }

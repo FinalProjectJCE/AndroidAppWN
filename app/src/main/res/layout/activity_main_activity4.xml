@@ -4,7 +4,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.example.zaken.androidappwn.MainActivity4"
+    tools:context="com.example.zaken.androidappwn.FinalPage"
     android:background="@drawable/withegray">
 
     <LinearLayout
@@ -104,7 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="מספר התור הנוכחי הוא: "
+                android:text="@string/nextInLineTV"
                 android:id="@+id/current_line_in_queue"
                 android:textSize="20sp"
                 android:layout_below="@+id/business_name_in_queue"
@@ -145,7 +145,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="מספר האנשים בתור:"
+                android:text="לקוחות לפניך בתור : "
                 android:id="@+id/totalQueueText"
                 android:textSize="20sp"
                 android:layout_weight="1"

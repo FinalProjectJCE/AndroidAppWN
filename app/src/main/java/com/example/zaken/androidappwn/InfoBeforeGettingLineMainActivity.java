@@ -3,11 +3,9 @@ package com.example.zaken.androidappwn;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.TextView;
 import android.app.Activity;
 import android.widget.Toast;
@@ -17,11 +15,23 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
+/**
+ * This Is The Main Class For The "Info Before Getting Line" Page.
+ * The User Get To This Page After He Chose The Business He Want To See.
+ * In This Page, The User Can See The Next Queue Number, How Manny People Is In Queue And
+ * The Average Time For The Queue To Arrive If The User Get In Queue Now.
+ * There Are Also 3 Buttons:
+ * 1. Choose A Different Business
+ * 2. See The Opening Hours Of The Business.
+ * 3. Get A Queue.
+ * When The User Press The "Get A Queue" Button, There Is A GPS Distance Check For The
+ * User From The Business.
+ */
 
 public class InfoBeforeGettingLineMainActivity extends Activity implements LocationListener{
 
     private TextView businessName;
-    private QueueBL qbl;
+    private QueueInfoOutOfQueueBL qbl;
     private Activity activity;
     private  Context context;
     private int branchId;
@@ -32,35 +42,36 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     private double latitude;
     private SweetAlertDialog pDialog;
     private LocationListener thisLocationListener;
-    private DB database = new DB(this);
+    private BusinessesBL database = new BusinessesBL(this);
     private int distanceFromDB;
     private String businessNameFromIntent;
     private OpeningHoursBL openingHours;
 
-
+    /**
+     * This Method, Initialize The Fields And Starts The Async Task For The Display
+     * Of The Data.
+     * It Gets The Business ID And Name From The Previous Page.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.info_activity_before_getting_line);
 
-
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         businessName = (TextView) findViewById(R.id.businessNameTV);
         Intent intent = getIntent();
         businessNameFromIntent = intent.getStringExtra("name");
-        branchId = intent.getIntExtra("branchId",0);
+        branchId = intent.getIntExtra("branchId", 0);
         latitude = database.getLatitude(branchId);
-        Log.d("latitude",""+latitude);
         longitude=database.getLongitude(branchId);
-        Log.d("longi",""+longitude);
         distanceFromDB=database.getDistance(branchId);
-        Log.d("distance",""+distanceFromDB);
         businessName.setText(businessNameFromIntent);
         setActivity(this);
-        qbl=new QueueBL(this,this,branchId);
+        qbl=new QueueInfoOutOfQueueBL(this,this,branchId);
         qbl.showQueue();
         thisLocationListener=this;
         }
+
     private Context getContext()
     {
         return this.context;
@@ -94,26 +105,31 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
 
         return super.onOptionsItemSelected(item);
     }
+
+    // When The Activity Pauses, Kill The Task.
     @Override
     public void onPause(){
         super.onPause();
         qbl.task.cancel(true);
-//        task.cancel(true);
     }
+
+    // When The Activity Restarts, Start The Task Again.
     public void onRestart(){
         super.onRestart();
-        qbl=new QueueBL(this,this,branchId);
+        qbl=new QueueInfoOutOfQueueBL(this,this,branchId);
         qbl.showQueue();
     }
 
     public void testForInLine(View view)
     {
-        Intent i=new Intent(this,MainActivity4.class);
-        i.putExtra("businessNameFromIntent",businessName.getText());
-        i.putExtra("branchId",  branchId);
+        Intent i=new Intent(this,ChooseBusinessMainActivity.class);
         startActivity(i);
     }
 
+    /**
+     * This Method Is Invoked When The User Press The "Get A Queue" Button.
+     * It Sets An Alert And Starts The GPS Distance Check.
+     */
     public void getQueueButtonClick(final View view)
     {
         lm.requestLocationUpdates(lm.GPS_PROVIDER,MIN_TIME_FOR_UPDATE,MIN_DIS_FOR_UPDATES,this);
@@ -135,33 +151,34 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
     }
 
 
-
+    /**
+     * This Method Is Part Of The LocationListener.
+     * When The User Location Is Defined, The Distance Check Is Started.
+     * If The Distance Is Too Long, A Dialog Will Apears.
+     * If The Distance Is OK, The User Will Redirect To The Final Page And A Queue
+     * Will Be Calculated.
+     */
     @Override
     public void onLocationChanged(Location location)
     {
         lm.removeUpdates(this);
 
-        Log.d("ONLOCATION", "Hererer");
             float distance;
             Location businessLocation = new Location("");
             businessLocation.setLatitude(latitude);
             businessLocation.setLongitude(longitude);
             distance = location.distanceTo(businessLocation);
-            String notice = "The Distance Between Is \n" + distance;
-            Toast.makeText(this, notice, Toast.LENGTH_LONG).show();
             if (distance < distanceFromDB || distanceFromDB==0 ) {
-                Intent i = new Intent(this, MainActivity4.class);
+                Intent i = new Intent(this, FinalPage.class);
                 i.putExtra("businessNameFromIntent",businessNameFromIntent+" From GPS");
                 i.putExtra("branchId", branchId );
                 pDialog.cancel();
-                //lm.removeUpdates(this);
                 startActivity(i);
             } else {
                 pDialog.cancel();
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("הנך עדיין רחוק/ה מבית העסק")
                         .setContentText("עלייך להיות קרוב/ה לבית העסק בלפחות 100 מטר")
-                        //.setCancelText("בדוק שנית")
                         .setConfirmText("אישור")
                         .showCancelButton(false)
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -190,6 +207,7 @@ public class InfoBeforeGettingLineMainActivity extends Activity implements Locat
 
     }
 
+    // If The GPS Is OFF, A Message Will Apeare To The User.
     @Override
     public void onProviderDisabled(String provider) {
         Toast.makeText(this,

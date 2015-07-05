@@ -3,7 +3,6 @@ package com.example.zaken.androidappwn;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.TextView;
 
 import java.sql.Time;
@@ -13,10 +12,12 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * Created by Zaken on 02/04/2015.
+ * This Class Is The Business Logic Layer For
+ * The Queue Data While The User Is Not In Queue.
  */
-public class QueueBL
+public class QueueInfoOutOfQueueBL
 {
-    public QueueDAL task;
+    public QueueInfoOutOfQueueDAL task;
     private TextView currentQueueDisplay;
     private TextView averageTextView;
     private TextView waitingClientsTV;
@@ -24,22 +25,29 @@ public class QueueBL
     private Activity activity;
     private int branchId;
 
-    public QueueBL(Activity activity,Context context,int branchId)
+    public QueueInfoOutOfQueueBL(Activity activity, Context context, int branchId)
     {
         this.context=context;
         this.activity=activity;
         this.branchId=branchId;
-
     }
+
+    /**
+     * Sets The Text Views In The Final Page.
+     */
     public void showQueue()
     {
         currentQueueDisplay = (TextView) activity.findViewById(R.id.currentQueueDisplayTV);
         averageTextView = (TextView) activity.findViewById(R.id.timeTextView);
         waitingClientsTV = (TextView) activity.findViewById(R.id.waitingClientsDisplayTV);
-        task= new QueueDAL(this,activity,context,branchId);
+        task= new QueueInfoOutOfQueueDAL(this,activity,context,branchId);
         task.execute();
     }
 
+    /**
+     * Sets The Data in The Text Views For The Display.
+     * From The Data That Receive From The Database
+     */
     public void setTextViews(Object...progress)
     {
         Time t = (Time) progress[1];
@@ -60,15 +68,16 @@ public class QueueBL
         averageTextView.setText(setAverage(t.getHours(),t.getMinutes(),t.getSeconds(),(Integer)progress[2],(Integer)progress[3]));
     }
 
+    /**
+     * Sets The Average Time For Until The Queue Is Arrived((Average Time For Queue * Waiting Clients )/The Number Of Clerks)
+     */
     public String setAverage(int receivedHours, int receivedMinutes, int receivedSeconds,int queueNum,int numOfClerks) {
         Long secondsRR,newHours,newMinutes,newSeconds;
         String toReturn;
         secondsRR = TimeUnit.HOURS.toSeconds(receivedHours)+
                 TimeUnit.MINUTES.toSeconds(receivedMinutes)+
                 receivedSeconds;
-
         secondsRR = (secondsRR*queueNum)/numOfClerks;
-
         newHours=TimeUnit.SECONDS.toHours(secondsRR);
         secondsRR=secondsRR-(newHours*3600);
         newMinutes=TimeUnit.SECONDS.toMinutes(secondsRR);
@@ -91,9 +100,11 @@ public class QueueBL
         return toReturn;
     }
 
+    /**
+     * If There Is A Connection Problem, This Method Show A Dialog To The User.
+     */
     public void connectionProblemAlert()
     {
-
         SweetAlertDialog warningDialog = new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE);
         warningDialog.setTitleText("החיבור לאינטרנט כשל");
         warningDialog.setContentText("כעת לא תוכל לצפות בנתוני התור!");

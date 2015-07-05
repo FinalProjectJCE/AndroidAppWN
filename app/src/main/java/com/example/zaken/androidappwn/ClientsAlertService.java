@@ -13,16 +13,19 @@ import java.sql.Statement;
 
 /**
  * Created by Zaken on 28/05/2015.
+ * This Is The Service That Checks How Many Clients Left Before The User.
+ * This Is Activated After The User Choose To Get An Alert
  */
 public class ClientsAlertService extends Service {
 
     Thread myTread;
     boolean run;
-    int branchId,userQueue,userChoice;
-    String DB_URL =DatabaseConstants.DB_URL;
-    String USER = DatabaseConstants.USER;
-    String PASS = DatabaseConstants.PASS;
+    private int branchId,userQueue,userChoice;
+    private String DB_URL =DatabaseConstants.DB_URL;
+    private String USER = DatabaseConstants.USER;
+    private String PASS = DatabaseConstants.PASS;
     private SharedPreferences sharedPrefQueue;
+
 
     public ClientsAlertService()
     {
@@ -33,25 +36,20 @@ public class ClientsAlertService extends Service {
     public void onCreate() {
         run = false;
         super.onCreate();
-        Log.d("On Service Create", "");
-
     }
 
+    /**
+     * Starts The Tread And Check If The Number Of Waiting Clients Before The User,
+     * Is Lower Or Equal To His Choose.
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("onStartCommand", "");
-
         sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         userQueue = sharedPrefQueue.getInt("THE_LINE",0);
         branchId=sharedPrefQueue.getInt("BRANCH_ID",0);
         userChoice=sharedPrefQueue.getInt("USER_CLIENT_CHOICE",0)+1;
-
-            //branchId = intent.getIntExtra("branchId", 0);
-            //userQueue = intent.getIntExtra("userQueue", 0);
             if (!run) {
                 run = true;
-                Log.d("On Service Loop", "");
-
 
                 myTread = new Thread() {
                     public void run() {
@@ -65,17 +63,11 @@ public class ClientsAlertService extends Service {
                                     Statement st = con.createStatement();
                                     String query = "SELECT CurrentQueue FROM Queue WHERE BusinessId = '" + branchId + "'";
                                     ResultSet rs = st.executeQuery(query);
-//                                ResultSet rs2 = st2.executeQuery(query2);
 
                                     while (rs.next()) {
                                         int currentQueue = rs.getInt("CurrentQueue");
-                                        Log.d("Current Queue Is", "" + currentQueue);
-                                        Log.d("User Queue Is", "" + userQueue);
-                                        int g = userQueue - currentQueue;
-                                        Log.d("uq-cq", "" + g);
                                         if (userQueue - currentQueue < userChoice) {
                                             onDestroy();
-
                                             goToAlarmPage();
                                         }
 
@@ -103,6 +95,10 @@ public class ClientsAlertService extends Service {
         }
 
 
+    /**
+     * When The Number Of Waiting Clients Before The User Is Lower Or Equal To His Choose,
+     * The Service Starts The Alarm And Kill Itself.
+     */
     public void goToAlarmPage()
     {
         Intent alarm = new Intent();
@@ -117,10 +113,8 @@ public class ClientsAlertService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("Kill The Tread", "");
         run=false;
         super.onDestroy();
         stopSelf();
-
     }
 }

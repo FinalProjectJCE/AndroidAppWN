@@ -12,20 +12,20 @@ import java.util.ArrayList;
 
 /**
  * Created by Zaken on 09/05/2015.
+ * This Class Is The Data Access Layer
  */
-public class DB extends SQLiteOpenHelper {
+public class BusinessesDAL extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "dataBaseFile.db";
 
 
-    public DB(Context context) {
+    public BusinessesDAL(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-
     @Override
     public void onCreate(SQLiteDatabase db) {
-
+    // First Creation Of The Table
         db.execSQL("CREATE TABLE " + DatabaseConstants.TABLE_NAME + "(" +
                 DatabaseConstants._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 DatabaseConstants.MAIN_ID + " INTEGER," +
@@ -42,7 +42,6 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + DatabaseConstants.TABLE_NAME);
     }
 
-//
 
     public void insertToDB(String city, String business, int id, String branch , double latitude,double longitude,int distance) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -58,7 +57,7 @@ public class DB extends SQLiteOpenHelper {
         db.close();
     }
 
-
+    // This Method Returns All Of The Cities From The Database
     public ArrayList<String> getCities() {
         ArrayList<String> cities = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -69,6 +68,7 @@ public class DB extends SQLiteOpenHelper {
         return cities;
     }
 
+    // This Method Returns All Of The Business In The Specified City
     public ArrayList<String> getBusinessByCity(String choosenCity) {
         ArrayList<String> cities = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -79,6 +79,7 @@ public class DB extends SQLiteOpenHelper {
         return cities;
     }
 
+    // This Method Returns All Of The Branches Of The Specified Business In The Specified City
     public ArrayList<String> getBranchByCityAndBusiness(String choosenCity, String chosenBusiness) {
         ArrayList<String> cities = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -89,7 +90,7 @@ public class DB extends SQLiteOpenHelper {
         return cities;
 
     }
-
+    // This Method Returns The Unique Business Id.
     public int getBusinessId(String choosenCity, String chosenBusiness, String chosenBranch) {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -115,6 +116,7 @@ public class DB extends SQLiteOpenHelper {
         return toReturn;
     }
 
+    // This Method Returns The Longitude Of The Business By The businessId
     public double getLongitude(int businessId) {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -124,6 +126,7 @@ public class DB extends SQLiteOpenHelper {
         return c.getDouble(0);
     }
 
+    // This Method Returns The Latitude Of The Business By The businessId
     public double getLatitude(int businessId) {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -133,6 +136,7 @@ public class DB extends SQLiteOpenHelper {
         return c.getDouble(0);
     }
 
+    // This Method Returns The Maximum Distance That The User Need To Be From The Business.
     public int getDistance(int businessId) {
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -142,6 +146,7 @@ public class DB extends SQLiteOpenHelper {
         return c.getInt(0);
     }
 
+    // This Method Returns Business Full Name.
     public String getBusinessName(int businessId)
     {
         SQLiteDatabase db = this.getReadableDatabase();

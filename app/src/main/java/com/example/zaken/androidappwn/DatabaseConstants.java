@@ -2,6 +2,7 @@ package com.example.zaken.androidappwn;
 
 /**
  * Created by Zaken on 09/05/2015.
+ * This Class Saves The Database Constants.
  */
 
 import android.provider.BaseColumns;

@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -17,7 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-
+/*
+This Class Is For The Alarm Display
+ */
 public class AlarmMainActivity extends Activity {
     private Window wind;
     private MediaPlayer alarmSound;
@@ -36,16 +36,26 @@ public class AlarmMainActivity extends Activity {
         setContentView(R.layout.alarm_main);
         sharedPrefQueue = getSharedPreferences("MyPrefsFile",MODE_PRIVATE);
         editor = sharedPrefQueue.edit();
-
+        // This Section Is For Unlocking The Screen When It Is Off.
         wind = this.getWindow();
         wind.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         wind.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         wind.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        //
         alarmSound = MediaPlayer.create(this,R.raw.alarm);
-        alarmSound.start();
-        //setAlertMessage();
-        noticeAlertType=new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+        alarmSound.start();// Starts The Alarm Sound.
+        setNoticeAlert();
 
+
+    }
+
+    /*
+        This Method Sets The Alert Dialog To The User
+        When The User Press The OK Button, He Will Redirect Back To The Final Page
+     */
+    private void setNoticeAlert()
+    {
+        noticeAlertType=new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
         noticeAlertType.setTitleText("התראה לפי בקשתך!");
         noticeAlertType.setContentText(setAlertMessage());
         noticeAlertType.setConfirmText("אישור");
@@ -53,23 +63,22 @@ public class AlarmMainActivity extends Activity {
         noticeAlertType.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
             public void onClick(SweetAlertDialog sDialog) {
-                Intent i=new Intent(context,MainActivity4.class);
+                Intent i=new Intent(context,FinalPage.class);
                 int branchId = sharedPrefQueue.getInt("BRANCH_ID",0);
                 i.putExtra("branchId", branchId);
-
-                editor.putBoolean("ALERT_ON",false).apply();
-                Log.d("ALERT On Is FALSE","From ALARM");
+                editor.putBoolean("ALERT_ON",false).apply(); // Set The Alert Flag Off
                 sDialog.cancel();
                 startActivity(i);
             }
         });
         noticeAlertType.show();
-
-//        Window window = this.getWindow();
-//        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-//        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
     }
 
+
+    /*
+    This Method Sets The Alert Message To The User
+    According To His Alert Type.
+     */
     private String setAlertMessage()
     {
         String toReturn;
